@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>로그인 · 룸이스케이프</title>
+  <link rel="stylesheet" href="/css/user.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">Room Escape</h1>
+      <nav class="header-nav">
+        <a href="/index.html" class="nav-link">예약</a>
+        <a href="/login.html" class="nav-link active">로그인</a>
+        <a href="/admin.html" class="nav-link">관리자</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="main main--auth">
+    <section class="auth-card" aria-labelledby="auth-title">
+      <h2 id="auth-title" class="section-title">로그인</h2>
+      <p class="section-desc">이메일과 비밀번호로 로그인하세요.</p>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <label class="field">
+          <span class="field__label">이메일</span>
+          <input
+            type="email"
+            id="email-input"
+            name="email"
+            required
+            autocomplete="username"
+            placeholder="brown@woowa.com"
+          />
+        </label>
+        <label class="field">
+          <span class="field__label">비밀번호</span>
+          <input
+            type="password"
+            id="password-input"
+            name="password"
+            required
+            autocomplete="current-password"
+            placeholder="비밀번호"
+          />
+        </label>
+        <button type="submit" class="btn btn--primary">로그인</button>
+      </form>
+
+      <p id="login-message" class="message" role="status" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <small>Room Escape · 예약 데모</small>
+  </footer>
+
+  <script src="/js/login.js" defer></script>
+</body>
+</html>
