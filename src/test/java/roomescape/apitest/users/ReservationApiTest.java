@@ -73,7 +73,7 @@ class ReservationApiTest {
         SessionFilter session = loginAs(userName);
         Long generatedId = createReservation(session, FUTURE_DATE, timeId, themeId);
 
-        JsonPath body = getReservationsByUserName(session, userName);
+        JsonPath body = getMyReservations(session);
         List<Long> ids = body.getList("reservationDetailResponses.id", Long.class);
         List<String> names = body.getList("reservationDetailResponses.name", String.class);
 
@@ -171,7 +171,7 @@ class ReservationApiTest {
     @Test
     void 예약과_예약_대기_조회_API() {
         SessionFilter session = loginAs("토리");
-        JsonPath body = getReservationsByUserName(session, "토리");
+        JsonPath body = getMyReservations(session);
         List<Map<String, Object>> details = body.getList("reservationDetailResponses");
 
         long reservedCount = details.stream()
@@ -307,10 +307,10 @@ class ReservationApiTest {
                 .extract().jsonPath().getList("id", Long.class);
     }
 
-    private JsonPath getReservationsByUserName(SessionFilter session, String userName) {
+    private JsonPath getMyReservations(SessionFilter session) {
         return RestAssured.given().log().all()
                 .filter(session)
-                .when().get("/reservations?userName=" + userName)
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath();

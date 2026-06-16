@@ -68,10 +68,10 @@ public class WaitingDaoTest {
     }
 
     @Test
-    void 예약_대기_사용자_이름_조회_정상_테스트() {
-        String userName = "토리";
+    void 예약_대기_회원_식별자_조회_정상_테스트() {
+        Long memberId = 2L;
 
-        List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
+        List<WaitingQueryResult> waitings = waitingDao.findAllByMemberId(memberId);
 
         assertThat(waitings.size()).isEqualTo(1);
     }

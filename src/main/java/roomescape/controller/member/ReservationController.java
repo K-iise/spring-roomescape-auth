@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.common.auth.Login;
@@ -43,10 +42,9 @@ public class ReservationController {
         return ResponseEntity.ok().body(response);
     }
 
-    @GetMapping(params = "userName")
-    public ResponseEntity<ReservationDetailResponses> readAllByUserName(
-            @RequestParam("userName") String userName) {
-        ReservationDetailResults result = reservationService.findReservationDetailsByUserName(userName);
+    @GetMapping("/mine")
+    public ResponseEntity<ReservationDetailResponses> readMine(@Login LoginMember member) {
+        ReservationDetailResults result = reservationService.findReservationDetailsByMemberId(member.id());
 
         ReservationDetailResponses response = ReservationDetailResponses.from(result);
 

@@ -57,9 +57,9 @@ class ReservationDaoTest {
     }
 
     @Test
-    @DisplayName("사용자 이름으로 저장된 예약들을 조회할 수 있다.")
-    void findReservationByUserName() {
-        List<Reservation> reservations = reservationDao.findAllByUserName("브라운");
+    @DisplayName("회원 식별자로 저장된 예약들을 조회할 수 있다.")
+    void findReservationByMemberId() {
+        List<Reservation> reservations = reservationDao.findAllByMemberId(1L);
 
         assertThat(reservations).hasSize(reservedSize - 5);
     }

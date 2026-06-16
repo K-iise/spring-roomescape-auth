@@ -105,14 +105,14 @@ public class WaitingDao {
         jdbcTemplate.update(sql, id);
     }
 
-    public List<WaitingQueryResult> findAllByUserName(String userName) {
+    public List<WaitingQueryResult> findAllByMemberId(Long memberId) {
         String sql = """
                 SELECT id, name, date, created_at,
                        time_id, start_at,
                        theme_id, theme_name, description, url,
                        sequence
                 FROM (
-                    SELECT w.id, m.name AS name, w.date, w.created_at,
+                    SELECT w.id, w.member_id, m.name AS name, w.date, w.created_at,
                            rt.id AS time_id, rt.start_at,
                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
                            ROW_NUMBER() OVER (
@@ -124,14 +124,14 @@ public class WaitingDao {
                     INNER JOIN reservation_time rt ON w.time_id = rt.id
                     INNER JOIN theme t ON w.theme_id = t.id
                 ) ranked
-                WHERE name = ?
+                WHERE member_id = ?
                 ORDER BY date, start_at, sequence
                 """;
 
         return jdbcTemplate.query(
                 sql,
                 WAITING_SEQUENCE_ROW_MAPPER,
-                userName
+                memberId
         );
     }
 

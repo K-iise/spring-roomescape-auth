@@ -40,7 +40,7 @@ public class ReservationDao {
         );
     }
 
-    public List<Reservation> findAllByUserName(String userName) {
+    public List<Reservation> findAllByMemberId(Long memberId) {
         String sql = """
                 SELECT r.id, r.member_id, m.name, r.date, rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url
@@ -48,13 +48,13 @@ public class ReservationDao {
                 INNER JOIN member m ON r.member_id = m.id
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
                 INNER JOIN theme t ON r.theme_id = t.id
-                WHERE m.name = ?
+                WHERE r.member_id = ?
                 ORDER BY r.date, rt.start_at ASC;
                 """;
         return jdbcTemplate.query(
                 sql,
                 RESERVATION_ROW_MAPPER,
-                userName
+                memberId
         );
     }
 

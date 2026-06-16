@@ -29,7 +29,7 @@ public class WaitingApiTest {
         Long createdId = createWaiting(session, FUTURE_DATE, timeId, themeId);
         assertThat(createdId).isNotNull();
 
-        JsonPath jsonPath = getReservationByUserName(session, "로운");
+        JsonPath jsonPath = getMyReservations(session);
         List<Map<String, Object>> details = jsonPath.getList("reservationDetailResponses");
 
         assertThat(details).hasSize(1);
@@ -58,7 +58,7 @@ public class WaitingApiTest {
                 .statusCode(422)
                 .body("message", containsString("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다."));
 
-        assertThat(getReservationByUserName(session, "로운").getList("reservationDetailResponses")).isEmpty();
+        assertThat(getMyReservations(session).getList("reservationDetailResponses")).isEmpty();
     }
 
     @Test
@@ -79,7 +79,7 @@ public class WaitingApiTest {
                 .statusCode(422)
                 .body("message", containsString("예약 대기는 중복으로 생성할 수 없습니다."));
 
-        assertThat(waitingCount(session, "토리")).isEqualTo(1);
+        assertThat(waitingCount(session)).isEqualTo(1);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class WaitingApiTest {
                 .statusCode(422)
                 .body("message", containsString("본인이 이미 예약한 시간에는 대기를 신청할 수 없습니다."));
 
-        assertThat(waitingCount(session, "브라운")).isEqualTo(0);
+        assertThat(waitingCount(session)).isEqualTo(0);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class WaitingApiTest {
                 .then().log().all()
                 .statusCode(204);
 
-        assertThat(waitingCount(session, "토리")).isEqualTo(0);
+        assertThat(waitingCount(session)).isEqualTo(0);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class WaitingApiTest {
                 .statusCode(403)
                 .body("message", containsString("다른 사람의 예약 대기는 취소할 수 없습니다."));
 
-        assertThat(waitingCount(session, "토리")).isEqualTo(1);
+        assertThat(waitingCount(loginAs("토리"))).isEqualTo(1);
     }
 
     private SessionFilter loginAs(String name) {
@@ -172,17 +172,17 @@ public class WaitingApiTest {
                 .extract().jsonPath().getLong("id");
     }
 
-    private JsonPath getReservationByUserName(SessionFilter session, String userName) {
+    private JsonPath getMyReservations(SessionFilter session) {
         return RestAssured.given().log().all()
                 .filter(session)
-                .when().get("/reservations?userName=" + userName)
+                .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath();
     }
 
-    private Long waitingCount(SessionFilter session, String userName) {
-        List<Map<String, Object>> responses = getReservationByUserName(session, userName)
+    private Long waitingCount(SessionFilter session) {
+        List<Map<String, Object>> responses = getMyReservations(session)
                 .getList("reservationDetailResponses");
 
         return responses.stream()

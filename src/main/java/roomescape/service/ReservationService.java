@@ -58,9 +58,9 @@ public class ReservationService {
     }
 
     @Transactional(isolation = Isolation.REPEATABLE_READ)
-    public ReservationDetailResults findReservationDetailsByUserName(String userName) {
-        List<Reservation> reservations = reservationDao.findAllByUserName(userName);
-        List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
+    public ReservationDetailResults findReservationDetailsByMemberId(Long memberId) {
+        List<Reservation> reservations = reservationDao.findAllByMemberId(memberId);
+        List<WaitingQueryResult> waitings = waitingDao.findAllByMemberId(memberId);
 
         List<ReservationDetailResult> details = Stream.concat(
                 reservations.stream().map(ReservationDetailResult::fromReservation),
