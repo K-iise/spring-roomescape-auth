@@ -29,6 +29,7 @@
   const tabLookup = document.getElementById("tab-lookup");
   const panelBooking = document.getElementById("panel-booking");
   const panelLookup = document.getElementById("panel-lookup");
+  const authArea = document.getElementById("auth-area");
 
   const PLACEHOLDER_IMG =
       "data:image/svg+xml," +
@@ -45,6 +46,7 @@
     availableDates: new Set(),
     calendarMonth: new Date(),
     editing: null,
+    member: null,
   };
 
   function formatYmd(d) {
@@ -374,9 +376,7 @@
     summaryDate.textContent = dateStr;
     reserveMessage.textContent = "";
     reserveMessage.className = "message";
-    if (!state.editing) {
-      nameInput.value = "";
-    }
+    applyReserverName();
     clearTimeChips();
     timeChipsEmpty.classList.add("is-hidden");
     updateSubmitButton();
@@ -444,6 +444,7 @@
     ev.preventDefault();
     reserveMessage.textContent = "";
     reserveMessage.className = "message";
+    if (!requireLogin()) return;
     if (!state.selectedTheme || !state.selectedDate) return;
     const timeId = state.selectedTimeId;
     const name = nameInput.value.trim();
@@ -673,6 +674,73 @@
     runLookup(userName);
   });
 
+  function applyReserverName() {
+    if (state.editing) {
+      nameInput.value = state.editing.userName;
+      nameInput.readOnly = true;
+    } else if (state.member) {
+      nameInput.value = state.member.name;
+      nameInput.readOnly = true;
+    } else {
+      nameInput.value = "";
+      nameInput.readOnly = false;
+    }
+    updateSubmitButton();
+  }
+
+  function requireLogin() {
+    if (state.member) return true;
+    if (window.confirm("예약하려면 로그인이 필요합니다. 로그인 페이지로 이동할까요?")) {
+      window.location.assign("/login.html");
+    }
+    return false;
+  }
+
+  function renderAuthArea() {
+    authArea.innerHTML = "";
+    if (state.member) {
+      const greet = document.createElement("span");
+      greet.className = "auth-user";
+      greet.textContent = `${state.member.name}님`;
+      const logout = document.createElement("button");
+      logout.type = "button";
+      logout.className = "btn btn--ghost auth-logout";
+      logout.textContent = "로그아웃";
+      logout.addEventListener("click", onLogout);
+      authArea.append(greet, logout);
+    } else {
+      const link = document.createElement("a");
+      link.href = "/login.html";
+      link.className = "nav-link";
+      link.textContent = "로그인";
+      authArea.appendChild(link);
+    }
+  }
+
+  async function onLogout() {
+    try {
+      await fetch("/logout", { method: "POST", credentials: "same-origin" });
+    } catch (_) {
+      /* 무시: 어차피 화면을 새로고침한다 */
+    }
+    state.member = null;
+    window.location.reload();
+  }
+
+  async function checkLogin() {
+    try {
+      const res = await fetch("/login/check", { credentials: "same-origin" });
+      state.member = res.ok ? { name: (await res.json()).name } : null;
+    } catch (_) {
+      state.member = null;
+    }
+    renderAuthArea();
+    if (state.member) {
+      lookupNameInput.value = state.member.name;
+    }
+  }
+
+  checkLogin();
   loadPopular();
   loadThemesForBooking();
 })();
