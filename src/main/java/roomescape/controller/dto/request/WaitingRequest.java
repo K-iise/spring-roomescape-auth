@@ -5,8 +5,6 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
 public record WaitingRequest(
-        @NotNull(message = "이름은 비어 있을 수 없습니다.")
-        String name,
         @NotNull(message = "날짜는 비어 있을 수 없습니다.")
         @JsonFormat(pattern = "yyyy-MM-dd")
         LocalDate date,

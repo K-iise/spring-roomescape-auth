@@ -9,7 +9,7 @@ public record ReservationCommand(
         Long timeId,
         Long themeId
 ) {
-    public static ReservationCommand from(ReservationRequest request) {
-        return new ReservationCommand(request.name(), request.date(), request.timeId(), request.themeId());
+    public static ReservationCommand of(ReservationRequest request, String name) {
+        return new ReservationCommand(name, request.date(), request.timeId(), request.themeId());
     }
 }

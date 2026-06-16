@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.common.auth.Login;
+import roomescape.common.auth.LoginMember;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.response.ReservationDetailResponses;
 import roomescape.controller.dto.response.ReservationResponse;
@@ -52,8 +54,9 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationRequest request) {
-        ReservationResult result = reservationService.reserve(ReservationCommand.from(request));
+    public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationRequest request,
+                                                      @Login LoginMember member) {
+        ReservationResult result = reservationService.reserve(ReservationCommand.of(request, member.name()));
         ReservationResponse response = ReservationResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -66,16 +69,18 @@ public class ReservationController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
-                                                      @Valid @RequestBody ReservationRequest request) {
-        ReservationResult result = reservationService.changeReservationSlot(id, ReservationCommand.from(request));
+                                                      @Valid @RequestBody ReservationRequest request,
+                                                      @Login LoginMember member) {
+        ReservationResult result = reservationService.changeReservationSlot(id,
+                ReservationCommand.of(request, member.name()));
         ReservationResponse response = ReservationResponse.from(result);
 
         return ResponseEntity.ok().body(response);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam("userName") String userName) {
-        reservationService.cancelReservation(id, userName);
+    public ResponseEntity<Void> delete(@PathVariable Long id, @Login LoginMember member) {
+        reservationService.cancelReservation(id, member.name());
         return ResponseEntity.noContent().build();
     }
 }

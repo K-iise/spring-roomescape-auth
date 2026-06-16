@@ -9,7 +9,7 @@ public record WaitingCommand(
         Long timeId,
         Long themeId
 ) {
-    public static WaitingCommand from(WaitingRequest request) {
-        return new WaitingCommand(request.name(), request.date(), request.timeId(), request.themeId());
+    public static WaitingCommand of(WaitingRequest request, String name) {
+        return new WaitingCommand(name, request.date(), request.timeId(), request.themeId());
     }
 }

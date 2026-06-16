@@ -14,6 +14,11 @@ INSERT INTO theme (name, description, url) VALUES ('폐병원의 진실', '1978�
 INSERT INTO theme (name, description, url) VALUES ('마지막 탐정', '연쇄 살인마의 다음 타깃은 바로 당신이다', '/images/last-detective');
 INSERT INTO theme (name, description, url) VALUES ('시간의 틈', '시공간이 뒤틀린 고대 유적 속에 갇혀버렸다', '/images/time-rift');
 
+INSERT INTO member (email, password, name) VALUES ('brown@woowa.com', 'password', '브라운');
+INSERT INTO member (email, password, name) VALUES ('tory@woowa.com', 'password', '토리');
+INSERT INTO member (email, password, name) VALUES ('pobi@woowa.com', 'password', '포비');
+INSERT INTO member (email, password, name) VALUES ('roun@woowa.com', 'password', '로운');
+
 INSERT INTO reservation_time (start_at) VALUES ('10:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('11:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('12:00:00');
