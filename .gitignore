@@ -35,3 +35,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### 도구/생성물 ###
+.omc/
+CLAUDE.md
+src/main/resources/static/images/*_test.png
