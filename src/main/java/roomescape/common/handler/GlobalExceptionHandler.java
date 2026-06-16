@@ -11,6 +11,7 @@ import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.UnauthorizedException;
 import roomescape.common.exception.UnprocessableEntityException;
 
 @RestControllerAdvice
@@ -45,6 +46,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<GlobalErrorResponse> handleBadRequestException(BadRequestException e) {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<GlobalErrorResponse> handleUnauthorizedException(UnauthorizedException e) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(GlobalErrorResponse.from(e.getMessage()));
     }
 
