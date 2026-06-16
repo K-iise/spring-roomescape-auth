@@ -15,6 +15,7 @@ import roomescape.domain.reservation.theme.ThumbnailUrl;
 import roomescape.domain.reservation.time.ReservationTime;
 
 class ReservationTest {
+    private final Long memberId = 1L;
     private final UserName userName = UserName.parse("아나키");
     private final LocalDate date = LocalDate.parse(TODAY);
 
@@ -28,7 +29,7 @@ class ReservationTest {
     @Test
     @DisplayName("올바른 정보로 예약을 생성하면 성공한다.")
     void 정상_예약_테스트() {
-        assertDoesNotThrow(() -> new Reservation(userName, date, time, theme));
+        assertDoesNotThrow(() -> new Reservation(memberId, userName, date, time, theme));
     }
 
     @Test
@@ -36,7 +37,7 @@ class ReservationTest {
     void 이름이_null_예외_테스트() {
         UserName userName = null;
 
-        assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(memberId, userName, date, time, theme))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("예약자 이름이 비어 있습니다.");
     }
@@ -46,7 +47,7 @@ class ReservationTest {
     void 날짜가_null_예외_테스트() {
         LocalDate date = null;
 
-        assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(memberId, userName, date, time, theme))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("예약 날짜가 비어 있습니다.");
     }
@@ -56,7 +57,7 @@ class ReservationTest {
     void 시간이_null_예외_테스트() {
         ReservationTime time = null;
 
-        assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(memberId, userName, date, time, theme))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("시간이 비어 있습니다.");
     }
@@ -66,7 +67,7 @@ class ReservationTest {
     void 테마가_null_예외_테스트() {
         Theme theme = null;
 
-        assertThatThrownBy(() -> new Reservation(userName, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(memberId, userName, date, time, theme))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("테마가 비어 있습니다.");
     }

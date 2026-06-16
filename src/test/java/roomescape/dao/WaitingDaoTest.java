@@ -27,6 +27,7 @@ import roomescape.domain.reservation.time.ReservationTime;
 @Import(WaitingDao.class)
 public class WaitingDaoTest {
 
+    private final Long memberId = 4L;
     private final UserName userName = UserName.parse("아나키");
     private final LocalDate date = LocalDate.parse(TODAY);
     private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -45,7 +46,7 @@ public class WaitingDaoTest {
     @Test
     void 예약_대기를_생성할_수_있다() {
         // given
-        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+        Waiting waiting = new Waiting(memberId, userName, date, time, theme, createdAt);
 
         // when
         Waiting saved = waitingDao.save(waiting);
@@ -77,11 +78,11 @@ public class WaitingDaoTest {
 
     @Test
     void 사용자가_동일한_예약에_이미_대기_중이면_True를_반환한다() {
-        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+        Waiting waiting = new Waiting(memberId, userName, date, time, theme, createdAt);
         waitingDao.save(waiting);
 
-        assertThat(waitingDao.existsBySlotAndName(
-                waiting.getName().value(),
+        assertThat(waitingDao.existsBySlotAndMember(
+                waiting.getMemberId(),
                 waiting.getDate(),
                 waiting.getTime().getId(),
                 waiting.getTheme().getId()
@@ -90,10 +91,10 @@ public class WaitingDaoTest {
 
     @Test
     void 해당_예약에_대기가_존재하지_않으면_False를_반환한다() {
-        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+        Waiting waiting = new Waiting(memberId, userName, date, time, theme, createdAt);
 
-        assertThat(waitingDao.existsBySlotAndName(
-                waiting.getName().value(),
+        assertThat(waitingDao.existsBySlotAndMember(
+                waiting.getMemberId(),
                 waiting.getDate(),
                 waiting.getTime().getId(),
                 waiting.getTheme().getId()
@@ -150,12 +151,12 @@ public class WaitingDaoTest {
         );
 
         Waiting earlier = new Waiting(
-                UserName.parse("먼저"),
+                1L, UserName.parse("브라운"),
                 slotDate, slotTime, slotTheme,
                 LocalDateTime.of(2026, 5, 1, 9, 0)
         );
         Waiting later = new Waiting(
-                UserName.parse("나중"),
+                2L, UserName.parse("토리"),
                 slotDate, slotTime, slotTheme,
                 LocalDateTime.of(2026, 5, 1, 10, 0)
         );
@@ -165,7 +166,7 @@ public class WaitingDaoTest {
         Waiting first = waitingDao.findFirstBySlot(slotDate, slotTime.getId(), slotTheme.getId())
                 .orElseThrow();
 
-        assertThat(first.getName().value()).isEqualTo("먼저");
+        assertThat(first.getName().value()).isEqualTo("브라운");
     }
 
     @Test
@@ -181,12 +182,12 @@ public class WaitingDaoTest {
         );
 
         Waiting savedFirst = waitingDao.save(new Waiting(
-                UserName.parse("먼저저장"),
+                1L, UserName.parse("브라운"),
                 slotDate, slotTime, slotTheme,
                 sameCreatedAt
         ));
         Waiting savedSecond = waitingDao.save(new Waiting(
-                UserName.parse("나중저장"),
+                2L, UserName.parse("토리"),
                 slotDate, slotTime, slotTheme,
                 sameCreatedAt
         ));
@@ -196,6 +197,6 @@ public class WaitingDaoTest {
 
         assertThat(savedFirst.getId()).isLessThan(savedSecond.getId());
         assertThat(first.getId()).isEqualTo(savedFirst.getId());
-        assertThat(first.getName().value()).isEqualTo("먼저저장");
+        assertThat(first.getName().value()).isEqualTo("브라운");
     }
 }

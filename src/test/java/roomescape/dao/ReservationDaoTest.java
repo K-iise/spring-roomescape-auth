@@ -24,6 +24,7 @@ import roomescape.domain.reservation.time.ReservationTime;
 @Import(ReservationDao.class)
 class ReservationDaoTest {
 
+    private final Long memberId = 2L;
     private final UserName userName = UserName.parse("토리");
     private final LocalDate futureDate = LocalDate.parse(FUTURE_DATE);
     private final ReservationTime unusedTime = new ReservationTime(9L, LocalTime.of(18, 0));
@@ -36,7 +37,7 @@ class ReservationDaoTest {
     @Test
     @DisplayName("예약을 저장할 수 있다")
     void saveReservation() {
-        Reservation reservation = new Reservation(userName, futureDate, unusedTime, unusedTheme);
+        Reservation reservation = new Reservation(memberId, userName, futureDate, unusedTime, unusedTheme);
 
         Reservation saved = reservationDao.save(reservation);
 
@@ -108,8 +109,8 @@ class ReservationDaoTest {
     void existsByUserNameAndSlotResultTrue() {
         LocalDate date = LocalDate.of(2026, 5, 1);
 
-        boolean result = reservationDao.existsByUserNameAndSlot(
-                "브라운", date, themeWithId(11L), timeWithId(1L));
+        boolean result = reservationDao.existsByMemberIdAndSlot(
+                1L, date, themeWithId(11L), timeWithId(1L));
 
         assertThat(result).isTrue();
     }
@@ -119,8 +120,8 @@ class ReservationDaoTest {
     void existsByUserNameAndSlotResultFalse() {
         LocalDate date = LocalDate.of(2026, 5, 1);
 
-        boolean result = reservationDao.existsByUserNameAndSlot(
-                "토리", date, themeWithId(11L), timeWithId(1L));
+        boolean result = reservationDao.existsByMemberIdAndSlot(
+                2L, date, themeWithId(11L), timeWithId(1L));
 
         assertThat(result).isFalse();
     }
@@ -153,13 +154,13 @@ class ReservationDaoTest {
     @DisplayName("예약을 수정할 수 있다.")
     void updateReservation() {
         Reservation updated = new Reservation(
-                1L, UserName.parse("아나키"), futureDate, unusedTime, unusedTheme);
+                1L, 3L, UserName.parse("포비"), futureDate, unusedTime, unusedTheme);
 
         boolean result = reservationDao.update(updated);
 
         assertThat(result).isTrue();
         Reservation found = reservationDao.findById(1L).orElseThrow();
-        assertThat(found.getName().value()).isEqualTo("아나키");
+        assertThat(found.getName().value()).isEqualTo("포비");
         assertThat(found.getDate()).isEqualTo(futureDate);
     }
 
@@ -167,7 +168,7 @@ class ReservationDaoTest {
     @DisplayName("존재하지 않는 예약을 수정하면 false를 반환한다.")
     void updateResultFalseWhenNotExists() {
         Reservation updated = new Reservation(
-                9999L, userName, futureDate, unusedTime, unusedTheme);
+                9999L, memberId, userName, futureDate, unusedTime, unusedTheme);
 
         assertThat(reservationDao.update(updated)).isFalse();
     }

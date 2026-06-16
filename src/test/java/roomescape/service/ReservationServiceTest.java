@@ -45,6 +45,8 @@ import roomescape.service.dto.result.ThemeResult;
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
     private final String userName = "로운";
+    private final Long memberId = 4L;
+    private final Long otherMemberId = 2L;
     private final LocalDate futureDate = LocalDate.parse(FUTURE_DATE);
     private final LocalDate pastDate = LocalDate.parse("2026-05-09");
 
@@ -83,8 +85,8 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_생성_정상_테스트() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation saved = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation saved = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
@@ -101,7 +103,7 @@ class ReservationServiceTest {
 
     @Test
     public void 존재하지_않는_시간으로_예약하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.reserve(command))
@@ -113,7 +115,7 @@ class ReservationServiceTest {
 
     @Test
     public void 존재하지_않는_테마로_예약하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.empty());
 
@@ -126,7 +128,7 @@ class ReservationServiceTest {
 
     @Test
     public void 과거_시간으로_예약하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, pastDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, pastDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
 
@@ -139,7 +141,7 @@ class ReservationServiceTest {
 
     @Test
     public void 중복된_슬롯에_예약하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.existsBy(futureDate, theme, time)).willReturn(true);
@@ -153,7 +155,7 @@ class ReservationServiceTest {
 
     @Test
     public void 대기가_있는_슬롯에_예약하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(waitingDao.existsBySlot(futureDate, timeId, themeId)).willReturn(true);
@@ -167,7 +169,7 @@ class ReservationServiceTest {
 
     @Test
     public void 다른_사용자가_먼저_같은_슬롯을_예약했으면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(reservationDao.existsBy(futureDate, theme, time)).willReturn(false);
@@ -181,8 +183,8 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_변경_정상_테스트() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
@@ -199,7 +201,7 @@ class ReservationServiceTest {
 
     @Test
     public void 존재하지_않는_예약을_변경하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
         given(reservationDao.findById(reservationId)).willReturn(Optional.empty());
 
         assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
@@ -212,8 +214,8 @@ class ReservationServiceTest {
     @Test
     public void 타인의_예약을_변경하면_예외가_발생한다() {
         String otherUser = "다른사람";
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(otherUser), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, otherMemberId, UserName.parse(otherUser), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
@@ -226,8 +228,8 @@ class ReservationServiceTest {
 
     @Test
     public void 지나간_예약을_변경하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), pastDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
         assertThatThrownBy(() -> reservationService.changeReservationSlot(reservationId, command))
@@ -239,8 +241,8 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_변경_시_대상_슬롯이_다른_요청에_선점되면_충돌_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
@@ -254,8 +256,8 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_변경_시_대상_예약이_사라지면_찾을_수_없음_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
@@ -269,8 +271,8 @@ class ReservationServiceTest {
 
     @Test
     public void 대기가_있는_슬롯으로_예약을_변경하면_예외가_발생한다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
@@ -286,10 +288,10 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_취소_정상_테스트() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        reservationService.cancelReservation(reservationId, userName);
+        reservationService.cancelReservation(reservationId, memberId);
 
         verify(reservationDao).delete(reservationId);
     }
@@ -298,7 +300,7 @@ class ReservationServiceTest {
     public void 존재하지_않는_예약을_취소하면_예외가_발생한다() {
         given(reservationDao.findById(reservationId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, userName))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, memberId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("삭제하려는 예약이 존재하지 않습니다.");
 
@@ -308,10 +310,10 @@ class ReservationServiceTest {
     @Test
     public void 타인의_예약을_취소하면_예외가_발생한다() {
         String otherUser = "다른사람";
-        Reservation origin = new Reservation(reservationId, UserName.parse(otherUser), futureDate, time, theme);
+        Reservation origin = new Reservation(reservationId, otherMemberId, UserName.parse(otherUser), futureDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, userName))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, memberId))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("다른 사람의 예약은 취소/변경할 수 없습니다.");
 
@@ -320,10 +322,10 @@ class ReservationServiceTest {
 
     @Test
     public void 과거_예약을_취소하면_예외가_발생한다() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), pastDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
 
-        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, userName))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, memberId))
                 .isInstanceOf(UnprocessableEntityException.class)
                 .hasMessage("이미 지난 시간입니다.");
 
@@ -332,7 +334,7 @@ class ReservationServiceTest {
 
     @Test
     public void 관리자_예약_삭제_정상_테스트() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         reservationService.removeReservation(reservationId);
 
@@ -341,10 +343,11 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_취소_시_같은_슬롯의_1번_대기자가_예약으로_승격된다() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
         Long waitingId = 99L;
         Waiting firstWaiting = new Waiting(
                 waitingId,
+                otherMemberId,
                 UserName.parse("대기자"),
                 futureDate, time, theme,
                 LocalDateTime.of(2026, 5, 9, 12, 0)
@@ -354,7 +357,7 @@ class ReservationServiceTest {
         given(reservationDao.delete(reservationId)).willReturn(true);
         given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.of(firstWaiting));
 
-        reservationService.cancelReservation(reservationId, userName);
+        reservationService.cancelReservation(reservationId, memberId);
 
         verify(reservationDao).delete(reservationId);
         verify(reservationDao).save(any(Reservation.class));
@@ -363,13 +366,13 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_취소_시_대기자가_없으면_승격이_일어나지_않는다() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         given(reservationDao.delete(reservationId)).willReturn(true);
         given(waitingDao.findFirstBySlot(futureDate, timeId, themeId)).willReturn(Optional.empty());
 
-        reservationService.cancelReservation(reservationId, userName);
+        reservationService.cancelReservation(reservationId, memberId);
 
         verify(reservationDao).delete(reservationId);
         verify(reservationDao, never()).save(any());
@@ -378,10 +381,11 @@ class ReservationServiceTest {
 
     @Test
     public void 관리자_강제_삭제_시_미래_슬롯이면_1번_대기자가_예약으로_승격된다() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
         Long waitingId = 99L;
         Waiting firstWaiting = new Waiting(
                 waitingId,
+                otherMemberId,
                 UserName.parse("대기자"),
                 futureDate, time, theme,
                 LocalDateTime.of(2026, 5, 9, 12, 0)
@@ -400,7 +404,7 @@ class ReservationServiceTest {
 
     @Test
     public void 관리자_강제_삭제_시_과거_슬롯이면_승격이_일어나지_않는다() {
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), pastDate, time, theme);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), pastDate, time, theme);
 
         given(reservationDao.findById(reservationId)).willReturn(Optional.of(origin));
         given(reservationDao.delete(reservationId)).willReturn(true);
@@ -414,11 +418,12 @@ class ReservationServiceTest {
 
     @Test
     public void 예약_변경_시_변경_전_슬롯의_1번_대기자가_예약으로_승격된다() {
-        ReservationCommand command = new ReservationCommand(userName, futureDate, timeId, themeId);
-        Reservation origin = new Reservation(reservationId, UserName.parse(userName), futureDate, time, theme);
+        ReservationCommand command = new ReservationCommand(memberId, userName, futureDate, timeId, themeId);
+        Reservation origin = new Reservation(reservationId, memberId, UserName.parse(userName), futureDate, time, theme);
         Long waitingId = 99L;
         Waiting firstWaiting = new Waiting(
                 waitingId,
+                otherMemberId,
                 UserName.parse("대기자"),
                 futureDate, time, theme,
                 LocalDateTime.of(2026, 5, 9, 12, 0)

@@ -17,6 +17,7 @@ import roomescape.domain.reservation.theme.ThumbnailUrl;
 import roomescape.domain.reservation.time.ReservationTime;
 
 public class WaitingTest {
+    private final Long memberId = 1L;
     private final UserName userName = UserName.parse("아나키");
     private final LocalDate date = LocalDate.parse(TODAY);
 
@@ -35,7 +36,7 @@ public class WaitingTest {
     @Test
     @DisplayName("올바른 정보로 예약 대기를 생성하면 성공한다.")
     void 정상_예약_테스트() {
-        assertDoesNotThrow(() -> new Waiting(userName, date, time, theme, createdAt));
+        assertDoesNotThrow(() -> new Waiting(memberId, userName, date, time, theme, createdAt));
     }
 
     @Test
@@ -43,7 +44,7 @@ public class WaitingTest {
     void 이름이_null_예외_테스트() {
         UserName userName = null;
 
-        assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
+        assertThatThrownBy(() -> new Waiting(memberId, userName, date, time, theme, createdAt))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("예약자 이름이 비어 있습니다.");
     }
@@ -53,7 +54,7 @@ public class WaitingTest {
     void 날짜가_null_예외_테스트() {
         LocalDate date = null;
 
-        assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
+        assertThatThrownBy(() -> new Waiting(memberId, userName, date, time, theme, createdAt))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("예약 날짜가 비어 있습니다.");
     }
@@ -63,7 +64,7 @@ public class WaitingTest {
     void 시간이_null_예외_테스트() {
         ReservationTime time = null;
 
-        assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
+        assertThatThrownBy(() -> new Waiting(memberId, userName, date, time, theme, createdAt))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("시간이 비어 있습니다.");
     }
@@ -73,7 +74,7 @@ public class WaitingTest {
     void 테마가_null_예외_테스트() {
         Theme theme = null;
 
-        assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
+        assertThatThrownBy(() -> new Waiting(memberId, userName, date, time, theme, createdAt))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("테마가 비어 있습니다.");
     }
@@ -83,7 +84,7 @@ public class WaitingTest {
     void 대기_신청_시간_null_예외_테스트() {
         LocalDateTime createdAt = null;
 
-        assertThatThrownBy(() -> new Waiting(userName, date, time, theme, createdAt))
+        assertThatThrownBy(() -> new Waiting(memberId, userName, date, time, theme, createdAt))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("대기 신청 시간이 비어 있습니다.");
     }

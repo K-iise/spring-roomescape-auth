@@ -35,7 +35,9 @@ import roomescape.service.dto.command.ReservationCommand;
 public class ReservationServiceTransactionTest {
 
     private static final String RESERVATION_OWNER = "토리";
-    private static final String WAITER_NAME = "로키";
+    private static final Long RESERVATION_OWNER_ID = 2L;
+    private static final String WAITER_NAME = "로운";
+    private static final Long WAITER_ID = 4L;
 
     private final LocalDate date = LocalDate.parse(FUTURE_DATE);
     private final Long timeId = 5L;
@@ -71,13 +73,13 @@ public class ReservationServiceTransactionTest {
         Theme theme = themeDao.findThemeById(themeId).orElseThrow();
 
         Reservation reservation = reservationDao.save(new Reservation(
-                UserName.parse(RESERVATION_OWNER), date, time, theme
+                RESERVATION_OWNER_ID, UserName.parse(RESERVATION_OWNER), date, time, theme
         ));
         reservationId = reservation.getId();
 
         LocalDateTime createdAt = LocalDateTime.of(LocalDate.parse(TODAY), LocalTime.parse(NOW_TIME));
         Waiting waiting = waitingDao.save(new Waiting(
-                UserName.parse(WAITER_NAME), date, time, theme, createdAt
+                WAITER_ID, UserName.parse(WAITER_NAME), date, time, theme, createdAt
         ));
         waitingId = waiting.getId();
     }
@@ -94,7 +96,7 @@ public class ReservationServiceTransactionTest {
         doThrow(new RuntimeException("승격의 마지막의 대기가 삭제 실패하는 경우")).when(waitingDao).delete(waitingId);
 
         // when
-        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, RESERVATION_OWNER))
+        assertThatThrownBy(() -> reservationService.cancelReservation(reservationId, RESERVATION_OWNER_ID))
                 .isInstanceOf(RuntimeException.class);
 
         // then
@@ -106,7 +108,7 @@ public class ReservationServiceTransactionTest {
     void 대기_승격_실패_시_예약_변경도_롤백된다() {
         // given
         Long newTimeId = 6L;
-        ReservationCommand command = new ReservationCommand(RESERVATION_OWNER, date, newTimeId, themeId);
+        ReservationCommand command = new ReservationCommand(RESERVATION_OWNER_ID, RESERVATION_OWNER, date, newTimeId, themeId);
         doThrow(new RuntimeException("승격의 마지막의 대기가 삭제 실패하는 경우")).when(waitingDao).delete(waitingId);
 
         // when

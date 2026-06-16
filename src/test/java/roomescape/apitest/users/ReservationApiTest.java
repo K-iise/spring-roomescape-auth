@@ -40,7 +40,8 @@ class ReservationApiTest {
         initialReservationSize = Optional.ofNullable(total).orElse(0);
 
         Integer byUser = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE name = ?", Integer.class, userName);
+                "SELECT COUNT(*) FROM reservation r INNER JOIN member m ON r.member_id = m.id WHERE m.name = ?",
+                Integer.class, userName);
         initialUserReservationSize = Optional.ofNullable(byUser).orElse(0);
     }
 
