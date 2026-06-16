@@ -56,7 +56,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationRequest request,
                                                       @Login LoginMember member) {
-        ReservationResult result = reservationService.reserve(ReservationCommand.of(request, member.name()));
+        ReservationResult result = reservationService.reserve(ReservationCommand.of(request, member));
         ReservationResponse response = ReservationResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -72,7 +72,7 @@ public class ReservationController {
                                                       @Valid @RequestBody ReservationRequest request,
                                                       @Login LoginMember member) {
         ReservationResult result = reservationService.changeReservationSlot(id,
-                ReservationCommand.of(request, member.name()));
+                ReservationCommand.of(request, member));
         ReservationResponse response = ReservationResponse.from(result);
 
         return ResponseEntity.ok().body(response);
@@ -80,7 +80,7 @@ public class ReservationController {
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, @Login LoginMember member) {
-        reservationService.cancelReservation(id, member.name());
+        reservationService.cancelReservation(id, member.id());
         return ResponseEntity.noContent().build();
     }
 }

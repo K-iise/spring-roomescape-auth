@@ -9,39 +9,46 @@ import roomescape.domain.reservation.time.ReservationTime;
 public class Reservation {
 
     private final Long id;
+    private final Long memberId;
     private final UserName userName;
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
 
-    public Reservation(UserName userName, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, userName, date, time, theme);
+    public Reservation(Long memberId, UserName userName, LocalDate date, ReservationTime time, Theme theme) {
+        this(null, memberId, userName, date, time, theme);
     }
 
-    public Reservation(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Long memberId, UserName userName, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
-        validate(userName, date, time, theme);
+        validate(memberId, userName, date, time, theme);
+        this.memberId = memberId;
         this.userName = userName;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    private void validate(UserName userName, LocalDate date, ReservationTime time, Theme theme) {
+    private void validate(Long memberId, UserName userName, LocalDate date, ReservationTime time, Theme theme) {
+        Objects.requireNonNull(memberId, "예약자가 비어 있습니다.");
         Objects.requireNonNull(userName, "예약자 이름이 비어 있습니다.");
         Objects.requireNonNull(date, "예약 날짜가 비어 있습니다.");
         Objects.requireNonNull(time, "시간이 비어 있습니다.");
         Objects.requireNonNull(theme, "테마가 비어 있습니다.");
     }
 
-    public void validateOwner(String name) {
-        if (!userName.isOwnedBy(name)) {
+    public void validateOwner(Long memberId) {
+        if (!this.memberId.equals(memberId)) {
             throw new ForbiddenException("다른 사람의 예약은 취소/변경할 수 없습니다.");
         }
     }
 
     public Long getId() {
         return id;
+    }
+
+    public Long getMemberId() {
+        return memberId;
     }
 
     public UserName getName() {

@@ -30,7 +30,7 @@ public class WaitingController {
     @PostMapping
     public ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request,
                                                          @Login LoginMember member) {
-        WaitingResult result = waitingService.save(WaitingCommand.of(request, member.name()));
+        WaitingResult result = waitingService.save(WaitingCommand.of(request, member));
         WaitingResponse response = WaitingResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -43,7 +43,7 @@ public class WaitingController {
 
     @DeleteMapping(value = {"/{id}"})
     public ResponseEntity<WaitingResponse> deleteWaiting(@PathVariable long id, @Login LoginMember member) {
-        waitingService.delete(id, member.name());
+        waitingService.delete(id, member.id());
         return ResponseEntity.noContent().build();
     }
 

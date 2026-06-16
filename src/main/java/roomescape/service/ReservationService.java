@@ -85,7 +85,7 @@ public class ReservationService {
     @Transactional
     public ReservationResult changeReservationSlot(Long id, ReservationCommand command) {
         Reservation origin = getReservationOrThrow(id);
-        origin.validateOwner(command.name());
+        origin.validateOwner(command.memberId());
         validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
         validateNoWaiting(command);
@@ -116,9 +116,9 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservation(Long id, String userName) {
+    public void cancelReservation(Long id, Long memberId) {
         Reservation origin = getReservationOrThrow(id);
-        origin.validateOwner(userName);
+        origin.validateOwner(memberId);
         validatePastTime(origin.getDate(), origin.getTime());
         if (!reservationDao.delete(id)) {
             return;
@@ -133,7 +133,8 @@ public class ReservationService {
 
         return new Reservation(
                 id,
-                UserName.parse(command.name()),
+                command.memberId(),
+                UserName.parse(command.memberName()),
                 command.date(),
                 time,
                 theme
@@ -143,7 +144,7 @@ public class ReservationService {
     private void promoteFirstWaiting(LocalDate date, ReservationTime time, Theme theme) {
         waitingDao.findFirstBySlot(date, time.getId(), theme.getId()).ifPresent(
                 waiting -> {
-                    reservationDao.save(new Reservation(waiting.getName(), date, time, theme));
+                    reservationDao.save(new Reservation(waiting.getMemberId(), waiting.getName(), date, time, theme));
                     waitingDao.delete(waiting.getId());
                 }
         );

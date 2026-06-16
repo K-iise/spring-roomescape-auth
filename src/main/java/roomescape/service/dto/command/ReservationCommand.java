@@ -1,15 +1,17 @@
 package roomescape.service.dto.command;
 
 import java.time.LocalDate;
+import roomescape.common.auth.LoginMember;
 import roomescape.controller.dto.request.ReservationRequest;
 
 public record ReservationCommand(
-        String name,
+        Long memberId,
+        String memberName,
         LocalDate date,
         Long timeId,
         Long themeId
 ) {
-    public static ReservationCommand of(ReservationRequest request, String name) {
-        return new ReservationCommand(name, request.date(), request.timeId(), request.themeId());
+    public static ReservationCommand of(ReservationRequest request, LoginMember member) {
+        return new ReservationCommand(member.id(), member.name(), request.date(), request.timeId(), request.themeId());
     }
 }

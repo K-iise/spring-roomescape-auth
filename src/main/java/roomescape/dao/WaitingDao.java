@@ -35,6 +35,7 @@ public class WaitingDao {
         );
         return new Waiting(
                 rs.getLong("id"),
+                rs.getLong("member_id"),
                 UserName.parse(rs.getString("name")),
                 rs.getDate("date").toLocalDate(),
                 time,
@@ -77,7 +78,7 @@ public class WaitingDao {
 
     public Waiting save(Waiting waiting) {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", waiting.getName().value());
+        params.put("member_id", waiting.getMemberId());
         params.put("date", waiting.getDate());
         params.put("time_id", waiting.getTime().getId());
         params.put("theme_id", waiting.getTheme().getId());
@@ -86,6 +87,7 @@ public class WaitingDao {
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Waiting(
                 id,
+                waiting.getMemberId(),
                 waiting.getName(),
                 waiting.getDate(),
                 waiting.getTime(),
@@ -96,7 +98,7 @@ public class WaitingDao {
 
     public void delete(Long id) {
         String sql = """
-                DELETE FROM waiting 
+                DELETE FROM waiting
                        WHERE id = ?
                 """;
 
@@ -110,7 +112,7 @@ public class WaitingDao {
                        theme_id, theme_name, description, url,
                        sequence
                 FROM (
-                    SELECT w.id, w.name, w.date, w.created_at,
+                    SELECT w.id, m.name AS name, w.date, w.created_at,
                            rt.id AS time_id, rt.start_at,
                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
                            ROW_NUMBER() OVER (
@@ -118,6 +120,7 @@ public class WaitingDao {
                                ORDER BY w.created_at, w.id ASC
                            ) AS sequence
                     FROM waiting w
+                    INNER JOIN member m ON w.member_id = m.id
                     INNER JOIN reservation_time rt ON w.time_id = rt.id
                     INNER JOIN theme t ON w.theme_id = t.id
                 ) ranked
@@ -134,10 +137,11 @@ public class WaitingDao {
 
     public Optional<Waiting> findById(Long id) {
         String sql = """
-                SELECT w.id, w.name, w.date, w.created_at,
+                SELECT w.id, w.member_id, m.name, w.date, w.created_at,
                        rt.id AS time_id, rt.start_at,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM waiting w
+                INNER JOIN member m ON w.member_id = m.id
                 INNER JOIN reservation_time rt ON w.time_id = rt.id
                 INNER JOIN theme t ON w.theme_id = t.id
                 WHERE w.id = ?
@@ -171,12 +175,12 @@ public class WaitingDao {
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsBySlotAndName(String name, LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlotAndMember(Long memberId, LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT EXISTS(
                             SELECT 1
                             FROM waiting
-                            WHERE name = ? AND date = ? AND
+                            WHERE member_id = ? AND date = ? AND
                                   time_id = ? AND theme_id = ?
                 )
                 """;
@@ -184,7 +188,7 @@ public class WaitingDao {
         Boolean result = jdbcTemplate.queryForObject(
                 sql,
                 Boolean.class,
-                name,
+                memberId,
                 date,
                 timeId,
                 themeId
@@ -219,10 +223,11 @@ public class WaitingDao {
 
     public Optional<Waiting> findFirstBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT w.id, w.name, w.date, w.created_at,
+                SELECT w.id, w.member_id, m.name, w.date, w.created_at,
                        rt.id AS time_id, rt.start_at,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM waiting w
+                INNER JOIN member m ON w.member_id = m.id
                 INNER JOIN reservation_time rt ON w.time_id = rt.id
                 INNER JOIN theme t ON w.theme_id = t.id
                 WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?

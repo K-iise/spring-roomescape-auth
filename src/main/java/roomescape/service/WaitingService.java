@@ -52,19 +52,20 @@ public class WaitingService {
             throw new UnprocessableEntityException("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다.");
         }
 
-        if (reservationDao.existsByUserNameAndSlot(command.name(), command.date(), theme, time)) {
+        if (reservationDao.existsByMemberIdAndSlot(command.memberId(), command.date(), theme, time)) {
             throw new UnprocessableEntityException("본인이 이미 예약한 시간에는 대기를 신청할 수 없습니다.");
         }
 
         Waiting waiting = new Waiting(
-                UserName.parse(command.name()),
+                command.memberId(),
+                UserName.parse(command.memberName()),
                 command.date(),
                 time,
                 theme,
                 LocalDateTime.now(clock)
         );
 
-        if (waitingDao.existsBySlotAndName(waiting.getName().value(), waiting.getDate(), time.getId(), theme.getId())) {
+        if (waitingDao.existsBySlotAndMember(waiting.getMemberId(), waiting.getDate(), time.getId(), theme.getId())) {
             throw new UnprocessableEntityException("예약 대기는 중복으로 생성할 수 없습니다.");
         }
 
@@ -74,11 +75,11 @@ public class WaitingService {
     }
 
     @Transactional
-    public void delete(Long id, String userName) {
+    public void delete(Long id, Long memberId) {
         Waiting origin = waitingDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 대기가 존재하지 않습니다."));
 
-        origin.validateOwner(userName);
+        origin.validateOwner(memberId);
 
         waitingDao.delete(id);
     }

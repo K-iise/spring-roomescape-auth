@@ -9,20 +9,23 @@ import roomescape.domain.reservation.time.ReservationTime;
 
 public class Waiting {
     private final Long id;
+    private final Long memberId;
     private final UserName userName;
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
     private final LocalDateTime createdAt;
 
-    public Waiting(UserName userName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
-        this(null, userName, date, time, theme, createdAt);
+    public Waiting(Long memberId, UserName userName, LocalDate date, ReservationTime time, Theme theme,
+                   LocalDateTime createdAt) {
+        this(null, memberId, userName, date, time, theme, createdAt);
     }
 
-    public Waiting(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme,
+    public Waiting(Long id, Long memberId, UserName userName, LocalDate date, ReservationTime time, Theme theme,
                    LocalDateTime createdAt) {
         this.id = id;
-        validate(userName, date, time, theme, createdAt);
+        validate(memberId, userName, date, time, theme, createdAt);
+        this.memberId = memberId;
         this.userName = userName;
         this.date = date;
         this.time = time;
@@ -30,8 +33,9 @@ public class Waiting {
         this.createdAt = createdAt;
     }
 
-    private void validate(UserName userName, LocalDate date, ReservationTime time, Theme theme,
+    private void validate(Long memberId, UserName userName, LocalDate date, ReservationTime time, Theme theme,
                           LocalDateTime createdAt) {
+        Objects.requireNonNull(memberId, "예약자가 비어 있습니다.");
         Objects.requireNonNull(userName, "예약자 이름이 비어 있습니다.");
         Objects.requireNonNull(date, "예약 날짜가 비어 있습니다.");
         Objects.requireNonNull(time, "시간이 비어 있습니다.");
@@ -39,14 +43,18 @@ public class Waiting {
         Objects.requireNonNull(createdAt, "대기 신청 시간이 비어 있습니다.");
     }
 
-    public void validateOwner(String name) {
-        if (!userName.isOwnedBy(name)) {
+    public void validateOwner(Long memberId) {
+        if (!this.memberId.equals(memberId)) {
             throw new ForbiddenException("다른 사람의 예약 대기는 취소할 수 없습니다.");
         }
     }
 
     public Long getId() {
         return id;
+    }
+
+    public Long getMemberId() {
+        return memberId;
     }
 
     public UserName getName() {

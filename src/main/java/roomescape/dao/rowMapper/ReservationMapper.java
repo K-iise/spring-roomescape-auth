@@ -24,6 +24,7 @@ public final class ReservationMapper {
         );
         return new Reservation(
                 rs.getLong("id"),
+                rs.getLong("member_id"),
                 UserName.parse(rs.getString("name")),
                 rs.getDate("date").toLocalDate(),
                 time,

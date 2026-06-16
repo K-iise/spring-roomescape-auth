@@ -29,9 +29,10 @@ public class ReservationDao {
     public List<Reservation> findAll() {
         return jdbcTemplate.query(
                 """
-                            SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
+                            SELECT r.id, r.member_id, m.name, r.date, rt.id AS time_id, rt.start_at,
                             t.id AS theme_id, t.name AS theme_name, t.description, t.url
                             FROM reservation r
+                            INNER JOIN member m ON r.member_id = m.id
                             INNER JOIN reservation_time rt ON r.time_id = rt.id
                             INNER JOIN theme t ON r.theme_id = t.id;
                         """,
@@ -41,12 +42,13 @@ public class ReservationDao {
 
     public List<Reservation> findAllByUserName(String userName) {
         String sql = """
-                SELECT r.id, r.name,r.date,rt.id AS time_id, rt.start_at,
+                SELECT r.id, r.member_id, m.name, r.date, rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM reservation r
+                INNER JOIN member m ON r.member_id = m.id
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
                 INNER JOIN theme t ON r.theme_id = t.id
-                WHERE r.name = ?
+                WHERE m.name = ?
                 ORDER BY r.date, rt.start_at ASC;
                 """;
         return jdbcTemplate.query(
@@ -92,7 +94,7 @@ public class ReservationDao {
 
     public Reservation save(Reservation reservation) {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", reservation.getName().value());
+        params.put("member_id", reservation.getMemberId());
         params.put("date", reservation.getDate());
         params.put("time_id", reservation.getTime().getId());
         params.put("theme_id", reservation.getTheme().getId());
@@ -100,6 +102,7 @@ public class ReservationDao {
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Reservation(
                 id,
+                reservation.getMemberId(),
                 reservation.getName(),
                 reservation.getDate(),
                 reservation.getTime(),
@@ -109,13 +112,13 @@ public class ReservationDao {
     public boolean update(Reservation reservation) {
         String sql = """
                 UPDATE reservation
-                SET name = ?, date = ?, time_id = ?, theme_id = ?
+                SET member_id = ?, date = ?, time_id = ?, theme_id = ?
                 WHERE id = ?;
                 """;
 
         int affectedRows = jdbcTemplate.update(
                 sql,
-                reservation.getName().value(),
+                reservation.getMemberId(),
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
@@ -148,12 +151,12 @@ public class ReservationDao {
         return Boolean.TRUE.equals(result);
     }
 
-    public boolean existsByUserNameAndSlot(String userName, LocalDate date, Theme theme, ReservationTime time) {
+    public boolean existsByMemberIdAndSlot(Long memberId, LocalDate date, Theme theme, ReservationTime time) {
         String sql = """
                 SELECT EXISTS(
                     SELECT 1
                     FROM reservation
-                    WHERE name = ?
+                    WHERE member_id = ?
                         AND date = ?
                         AND time_id = ?
                         AND theme_id = ?
@@ -162,7 +165,7 @@ public class ReservationDao {
         Boolean result = jdbcTemplate.queryForObject(
                 sql,
                 Boolean.class,
-                userName,
+                memberId,
                 date,
                 time.getId(),
                 theme.getId()
@@ -201,9 +204,10 @@ public class ReservationDao {
 
     public Optional<Reservation> findById(Long id) {
         String sql = """
-                SELECT r.id, r.name,r.date,rt.id AS time_id, rt.start_at,
+                SELECT r.id, r.member_id, m.name, r.date, rt.id AS time_id, rt.start_at,
                     t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM reservation r
+                INNER JOIN member m ON r.member_id = m.id
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
                 INNER JOIN theme t ON r.theme_id = t.id
                 WHERE r.id = ?
