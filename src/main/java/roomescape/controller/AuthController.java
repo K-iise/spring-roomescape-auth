@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.common.auth.SessionConst;
 import roomescape.common.exception.UnauthorizedException;
 import roomescape.controller.dto.request.LoginRequest;
 import roomescape.controller.dto.response.LoginCheckResponse;
@@ -17,8 +18,6 @@ import roomescape.service.dto.result.MemberResult;
 
 @RestController
 public class AuthController {
-
-    public static final String SESSION_MEMBER_ID = "memberId";
 
     private final AuthService authService;
 
@@ -31,7 +30,7 @@ public class AuthController {
         MemberResult member = authService.login(LoginCommand.from(request));
 
         HttpSession session = httpRequest.getSession(true);
-        session.setAttribute(SESSION_MEMBER_ID, member.id());
+        session.setAttribute(SessionConst.MEMBER_ID, member.id());
 
         return ResponseEntity.ok().build();
     }
@@ -57,10 +56,10 @@ public class AuthController {
 
     private Long extractMemberId(HttpServletRequest httpRequest) {
         HttpSession session = httpRequest.getSession(false);
-        if (session == null || session.getAttribute(SESSION_MEMBER_ID) == null) {
+        if (session == null || session.getAttribute(SessionConst.MEMBER_ID) == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
-        return (Long) session.getAttribute(SESSION_MEMBER_ID);
+        return (Long) session.getAttribute(SessionConst.MEMBER_ID);
     }
 }
