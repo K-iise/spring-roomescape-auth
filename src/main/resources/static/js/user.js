@@ -104,11 +104,11 @@
   tabLookup.addEventListener("click", () => {
     exitEditMode();
     setActiveTab("lookup");
-    document.getElementById("lookup-name-input").focus();
+    runLookup();
   });
 
-  function enterEditMode(item, userName) {
-    state.editing = { id: item.id, userName };
+  function enterEditMode(item) {
+    state.editing = { id: item.id };
     state.selectedTheme = {
       id: item.themeResponse.id,
       name: item.themeResponse.name,
@@ -118,7 +118,7 @@
     state.calendarMonth = new Date();
     selectedThemeName.textContent = item.themeResponse.name;
     btnBackThemes.style.display = "none";
-    nameInput.value = userName;
+    nameInput.value = state.member ? state.member.name : "";
     nameInput.readOnly = true;
 
     setActiveTab("booking");
@@ -457,19 +457,16 @@
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name,
             date: state.selectedDate,
             timeId,
             themeId: state.selectedTheme.id,
           }),
         });
-        const userName = editing.userName;
         exitEditMode();
         setActiveTab("lookup");
-        lookupNameInput.value = userName;
         lookupMessage.textContent = "예약이 변경되었습니다.";
         lookupMessage.className = "message message--ok";
-        await runLookup(userName);
+        await runLookup();
         loadPopular();
         return;
       }
@@ -478,7 +475,6 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name,
             date: state.selectedDate,
             timeId,
             themeId: state.selectedTheme.id,
@@ -490,7 +486,6 @@
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name,
             date: state.selectedDate,
             timeId,
             themeId: state.selectedTheme.id,
@@ -514,7 +509,6 @@
   });
 
   const lookupForm = document.getElementById("lookup-form");
-  const lookupNameInput = document.getElementById("lookup-name-input");
   const lookupMessage = document.getElementById("lookup-message");
   const lookupItems = document.getElementById("lookup-items");
 
@@ -530,7 +524,7 @@
     return dateTime.getTime() < Date.now();
   }
 
-  function renderReservationDetailItems(items, userName) {
+  function renderReservationDetailItems(items) {
     lookupItems.innerHTML = "";
     if (!items.length) {
       const empty = document.createElement("div");
@@ -544,14 +538,14 @@
     const waitings = items.filter((i) => i.status === "WAITING");
 
     if (reservations.length) {
-      lookupItems.appendChild(buildLookupGroup("예약 확정", "reserved", reservations, userName));
+      lookupItems.appendChild(buildLookupGroup("예약 확정", "reserved", reservations));
     }
     if (waitings.length) {
-      lookupItems.appendChild(buildLookupGroup("예약 대기", "waiting", waitings, userName));
+      lookupItems.appendChild(buildLookupGroup("예약 대기", "waiting", waitings));
     }
   }
 
-  function buildLookupGroup(title, kind, items, userName) {
+  function buildLookupGroup(title, kind, items) {
     const section = document.createElement("section");
     section.className = `lookup-group lookup-group--${kind}`;
 
@@ -603,14 +597,14 @@
         cancelBtn.type = "button";
         cancelBtn.className = "lookup-list__cancel";
         cancelBtn.textContent = "취소";
-        cancelBtn.addEventListener("click", () => cancelLookupItem(item, userName, cancelBtn));
+        cancelBtn.addEventListener("click", () => cancelLookupItem(item, cancelBtn));
 
         if (kind === "reserved") {
           const editBtn = document.createElement("button");
           editBtn.type = "button";
           editBtn.className = "lookup-list__edit";
           editBtn.textContent = "변경";
-          editBtn.addEventListener("click", () => enterEditMode(item, userName));
+          editBtn.addEventListener("click", () => enterEditMode(item));
           li.append(info, badge, editBtn, cancelBtn);
         } else {
           li.append(info, badge, cancelBtn);
@@ -623,12 +617,18 @@
     return section;
   }
 
-  async function runLookup(userName) {
+  async function runLookup() {
+    if (!state.member) {
+      lookupItems.innerHTML = "";
+      lookupMessage.textContent = "내 예약을 조회하려면 로그인이 필요합니다.";
+      lookupMessage.className = "message message--err";
+      return;
+    }
     try {
-      const data = await fetchJson(
-          `/reservations?userName=${encodeURIComponent(userName)}`
-      );
-      renderReservationDetailItems(data.reservationDetailResponses || [], userName);
+      const data = await fetchJson("/reservations/mine");
+      lookupMessage.textContent = "";
+      lookupMessage.className = "message";
+      renderReservationDetailItems(data.reservationDetailResponses || []);
     } catch (e) {
       lookupItems.innerHTML = "";
       lookupMessage.textContent = "조회에 실패했습니다. 잠시 후 다시 시도해 주세요.";
@@ -636,7 +636,7 @@
     }
   }
 
-  async function cancelLookupItem(item, userName, btn) {
+  async function cancelLookupItem(item, btn) {
     const isWaiting = item.status === "WAITING";
     const label = isWaiting ? "대기" : "예약";
     const confirmMsg = `${item.themeResponse.name} ${item.date} ${formatTime(item.timeResponse.startAt)} ${label}을(를) 취소하시겠습니까?`;
@@ -644,19 +644,13 @@
     btn.disabled = true;
     try {
       if (isWaiting) {
-        await fetchJson(
-            `/waitings/${item.id}?name=${encodeURIComponent(userName)}`,
-            { method: "DELETE" }
-        );
+        await fetchJson(`/waitings/${item.id}`, { method: "DELETE" });
       } else {
-        await fetchJson(
-            `/reservations/${item.id}?userName=${encodeURIComponent(userName)}`,
-            { method: "DELETE" }
-        );
+        await fetchJson(`/reservations/${item.id}`, { method: "DELETE" });
       }
       lookupMessage.textContent = `${label}이(가) 취소되었습니다.`;
       lookupMessage.className = "message message--ok";
-      await runLookup(userName);
+      await runLookup();
       loadPopular();
     } catch (e) {
       btn.disabled = false;
@@ -667,18 +661,11 @@
 
   lookupForm.addEventListener("submit", (ev) => {
     ev.preventDefault();
-    lookupMessage.textContent = "";
-    lookupMessage.className = "message";
-    const userName = lookupNameInput.value.trim();
-    if (!userName) return;
-    runLookup(userName);
+    runLookup();
   });
 
   function applyReserverName() {
-    if (state.editing) {
-      nameInput.value = state.editing.userName;
-      nameInput.readOnly = true;
-    } else if (state.member) {
+    if (state.member) {
       nameInput.value = state.member.name;
       nameInput.readOnly = true;
     } else {
@@ -735,9 +722,6 @@
       state.member = null;
     }
     renderAuthArea();
-    if (state.member) {
-      lookupNameInput.value = state.member.name;
-    }
   }
 
   checkLogin();
