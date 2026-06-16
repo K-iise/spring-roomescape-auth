@@ -29,38 +29,38 @@ INSERT INTO reservation_time (start_at) VALUES ('16:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('17:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('18:00:00');
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-01', 1, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-02', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-01', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-02', 1, 11);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 3, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 4, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 5, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-05-03', 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-05-03', 2, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-05-03', 3, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-05-03', 4, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-05-03', 5, 1);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-04', 1, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-04', 2, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-04', 3, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-04', 4, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-04', 1, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-04', 2, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-04', 3, 2);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-04', 4, 2);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-05', 1, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-05', 2, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-05', 3, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-05', 1, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-05', 2, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-05', 3, 3);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 7);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 9);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-06', 1, 10);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 6);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 7);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 9);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-06', 1, 10);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-10', 1, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-10', 2, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-10', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-10', 2, 11);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-11', 2, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-11', 2, 12);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-12', 5, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-12', 5, 1);
 
 
-INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES ('토리', '2026-05-12', 5, 1, '2026-05-10T09:00');
+INSERT INTO waiting (member_id, date, time_id, theme_id, created_at) VALUES (2, '2026-05-12', 5, 1, '2026-05-10T09:00');

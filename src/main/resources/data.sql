@@ -33,46 +33,46 @@ INSERT INTO reservation_time (start_at) VALUES ('18:00:00');
 
 -- 최근 7일(2026-06-09 ~ 2026-06-15) 예약 — 인기 테마 집계용
 -- 저주받은 저택(11)을 최다, 심해 탈출(12) 다음 순으로 노출
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-09', 1, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-09', 2, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-09', 3, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-10', 1, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-10', 2, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-11', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-09', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-09', 2, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-09', 3, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-10', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-10', 2, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-11', 1, 11);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-09', 4, 12);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-10', 4, 12);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-11', 4, 12);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-12', 4, 12);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-13', 4, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-09', 4, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-10', 4, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-11', 4, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-12', 4, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-13', 4, 12);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-10', 5, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-11', 5, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-12', 5, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-13', 5, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-10', 5, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-11', 5, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-12', 5, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-13', 5, 1);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-11', 6, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-12', 6, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-13', 6, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-11', 6, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-12', 6, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-13', 6, 3);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-12', 7, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-13', 7, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-12', 7, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-13', 7, 5);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-14', 1, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-14', 2, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-14', 1, 4);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-14', 2, 4);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-15', 3, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-06-15', 4, 14);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-15', 3, 8);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-06-15', 4, 14);
 
 -- 미래 예약 — 사용자 화면 데모용
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-29', 1, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-29', 2, 11);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-30', 5, 12);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-30', 6, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-06-01', 3, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('포비', '2026-06-02', 4, 5);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-29', 1, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-29', 2, 11);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (1, '2026-05-30', 5, 12);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-05-30', 6, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (2, '2026-06-01', 3, 3);
+INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (3, '2026-06-02', 4, 5);
 
 -- 예약 대기 — 같은 슬롯에 대해 토리/포비가 순번을 기다리는 시나리오
-INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES ('토리', '2026-05-29', 1, 11, '2026-05-27T10:00');
-INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES ('포비', '2026-05-29', 1, 11, '2026-05-27T11:30');
-INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES ('포비', '2026-05-30', 5, 12, '2026-05-28T09:00');
+INSERT INTO waiting (member_id, date, time_id, theme_id, created_at) VALUES (2, '2026-05-29', 1, 11, '2026-05-27T10:00');
+INSERT INTO waiting (member_id, date, time_id, theme_id, created_at) VALUES (3, '2026-05-29', 1, 11, '2026-05-27T11:30');
+INSERT INTO waiting (member_id, date, time_id, theme_id, created_at) VALUES (3, '2026-05-30', 5, 12, '2026-05-28T09:00');
