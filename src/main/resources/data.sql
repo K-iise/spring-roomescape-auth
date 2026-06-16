@@ -1,3 +1,8 @@
+-- 회원
+INSERT INTO member (email, password, name) VALUES ('brown@woowa.com', 'password', '브라운');
+INSERT INTO member (email, password, name) VALUES ('tory@woowa.com', 'password', '토리');
+INSERT INTO member (email, password, name) VALUES ('pobi@woowa.com', 'password', '포비');
+
 -- 테마
 INSERT INTO theme (name, description, url) VALUES ('우테코 공포물', '레벨2 미션의 공포', '/images/horror');
 INSERT INTO theme (name, description, url) VALUES ('미래 도시', '2050년 서울의 이야기', '/images/future-city');
