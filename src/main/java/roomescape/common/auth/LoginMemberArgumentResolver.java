@@ -1,7 +1,6 @@
 package roomescape.common.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -16,9 +15,11 @@ import roomescape.service.dto.result.MemberResult;
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthService authService;
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public LoginMemberArgumentResolver(AuthService authService) {
+    public LoginMemberArgumentResolver(AuthService authService, JwtTokenProvider jwtTokenProvider) {
         this.authService = authService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
     @Override
@@ -31,12 +32,12 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
     public Object resolveArgument(MethodParameter parameter, ModelAndViewContainer mavContainer,
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
-        HttpSession session = request.getSession(false);
-        if (session == null || session.getAttribute(SessionConst.MEMBER_ID) == null) {
+        String token = AuthorizationExtractor.extract(request);
+        if (token == null) {
             throw new UnauthorizedException("로그인이 필요합니다.");
         }
 
-        Long memberId = (Long) session.getAttribute(SessionConst.MEMBER_ID);
+        Long memberId = jwtTokenProvider.getMemberId(token);
         MemberResult member = authService.findById(memberId);
 
         return new LoginMember(member.id(), member.name());
