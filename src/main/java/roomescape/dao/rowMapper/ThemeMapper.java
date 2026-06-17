@@ -13,7 +13,8 @@ public final class ThemeMapper {
                 rs.getLong("id"),
                 ThemeName.parse(rs.getString("name")),
                 Description.parse(rs.getString("description")),
-                ThumbnailUrl.parse(rs.getString("url"))
+                ThumbnailUrl.parse(rs.getString("url")),
+                rs.getObject("store_id", Long.class)
         );
     };
 

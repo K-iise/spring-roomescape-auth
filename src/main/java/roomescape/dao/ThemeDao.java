@@ -28,8 +28,8 @@ public class ThemeDao {
 
     public Optional<Theme> findThemeById(Long id) {
         String sql = """
-                SELECT id, name, description, url 
-                FROM theme 
+                SELECT id, name, description, url, store_id
+                FROM theme
                 WHERE id = ?
                 """;
 
@@ -43,8 +43,16 @@ public class ThemeDao {
 
     public List<Theme> findAllThemes() {
         return jdbcTemplate.query(
-                "SELECT id, name, description, url FROM theme",
+                "SELECT id, name, description, url, store_id FROM theme",
                 THEME_ROW_MAPPER
+        );
+    }
+
+    public List<Theme> findAllByStoreId(Long storeId) {
+        return jdbcTemplate.query(
+                "SELECT id, name, description, url, store_id FROM theme WHERE store_id = ?",
+                THEME_ROW_MAPPER,
+                storeId
         );
     }
 
@@ -52,7 +60,7 @@ public class ThemeDao {
         return jdbcTemplate.query(
                 """
                            SELECT
-                           t.id, t.name, t.description, t.url, r.reservation_count
+                           t.id, t.name, t.description, t.url, t.store_id, r.reservation_count
                            FROM theme t
                            INNER JOIN (
                                SELECT theme_id, COUNT(id) AS reservation_count
@@ -76,6 +84,7 @@ public class ThemeDao {
         params.put("name", theme.getName().value());
         params.put("description", theme.getDescription().value());
         params.put("url", theme.getUrl().value());
+        params.put("store_id", theme.getStoreId());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
@@ -83,7 +92,8 @@ public class ThemeDao {
                 id,
                 theme.getName(),
                 theme.getDescription(),
-                theme.getUrl()
+                theme.getUrl(),
+                theme.getStoreId()
         );
     }
 
