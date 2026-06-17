@@ -32,8 +32,16 @@
     if (text) el.classList.add(ok ? "message--ok" : "message--err");
   }
 
+  function withAuth(options) {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return options;
+    const opts = options ? { ...options } : {};
+    opts.headers = { ...(opts.headers || {}), Authorization: `Bearer ${token}` };
+    return opts;
+  }
+
   async function fetchJson(url, options) {
-    const res = await fetch(url, options);
+    const res = await fetch(url, withAuth(options));
     if (!res.ok) {
       const t = await res.text();
       let message = res.statusText;
@@ -97,7 +105,7 @@
       formData.append("description", themeDesc.value.trim());
       formData.append("file", file);
 
-      const res = await fetch("/admin/themes", { method: "POST", body: formData });
+      const res = await fetch("/admin/themes", withAuth({ method: "POST", body: formData }));
       if (!res.ok) throw new Error(await res.text() || "등록 실패");
 
       setMsg(themeCreateMsg, "테마가 등록되었습니다.", true);
@@ -167,7 +175,7 @@
     const id = timeDeleteSelect.value;
     if (!id || !confirm("삭제하시겠습니까?")) return;
     try {
-      await fetch(`/admin/times/${id}`, { method: "DELETE" });
+      await fetch(`/admin/times/${id}`, withAuth({ method: "DELETE" }));
       setMsg(timeDeleteMsg, "삭제되었습니다.", true);
       await loadTimesIntoDeleteSelect();
     } catch (e) {

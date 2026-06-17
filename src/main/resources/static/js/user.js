@@ -71,8 +71,16 @@
     return url;
   }
 
+  function withAuth(options) {
+    const token = localStorage.getItem("accessToken");
+    if (!token) return options;
+    const opts = options ? { ...options } : {};
+    opts.headers = { ...(opts.headers || {}), Authorization: `Bearer ${token}` };
+    return opts;
+  }
+
   async function fetchJson(url, options) {
-    const res = await fetch(url, options);
+    const res = await fetch(url, withAuth(options));
     if (!res.ok) {
       const t = await res.text();
       let message = res.statusText;
@@ -704,19 +712,22 @@
     }
   }
 
-  async function onLogout() {
-    try {
-      await fetch("/logout", { method: "POST", credentials: "same-origin" });
-    } catch (_) {
-      /* 무시: 어차피 화면을 새로고침한다 */
-    }
+  function onLogout() {
+    // 서버 측 무효화 없이 토큰을 폐기한다(만료에 위임).
+    localStorage.removeItem("accessToken");
     state.member = null;
     window.location.reload();
   }
 
   async function checkLogin() {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      state.member = null;
+      renderAuthArea();
+      return;
+    }
     try {
-      const res = await fetch("/login/check", { credentials: "same-origin" });
+      const res = await fetch("/login/check", withAuth());
       state.member = res.ok ? { name: (await res.json()).name } : null;
     } catch (_) {
       state.member = null;

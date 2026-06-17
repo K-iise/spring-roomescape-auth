@@ -44,15 +44,16 @@
     message.className = "message";
 
     try {
-      // 세션 쿠키(JSESSIONID)를 받으려면 same-origin 요청이면 충분하지만 명시한다.
       const res = await fetch("/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "same-origin",
         body: JSON.stringify({ email, password }),
       });
 
       if (res.ok) {
+        // JWT를 받아 localStorage에 저장하고, 이후 요청 시 Authorization 헤더로 보낸다.
+        const body = await res.json();
+        localStorage.setItem("accessToken", body.accessToken);
         showOk("로그인되었습니다. 이동합니다…");
         window.location.assign(REDIRECT_AFTER_LOGIN);
         return;
