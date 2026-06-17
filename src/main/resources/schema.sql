@@ -6,6 +6,14 @@ CREATE TABLE IF NOT EXISTS member
     name     VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS store
+(
+    id                BIGINT       AUTO_INCREMENT PRIMARY KEY,
+    name              VARCHAR(255) NOT NULL,
+    manager_member_id BIGINT       NOT NULL,
+    FOREIGN KEY (manager_member_id) REFERENCES member (id)
+);
+
 CREATE TABLE IF NOT EXISTS reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
@@ -19,7 +27,9 @@ CREATE TABLE IF NOT EXISTS theme
     name        VARCHAR(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
     url         VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id)
+    store_id    BIGINT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (store_id) REFERENCES store (id)
 );
 
 CREATE TABLE IF NOT EXISTS reservation

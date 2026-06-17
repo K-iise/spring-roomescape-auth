@@ -19,6 +19,14 @@ INSERT INTO member (email, password, name) VALUES ('tory@woowa.com', 'password',
 INSERT INTO member (email, password, name) VALUES ('pobi@woowa.com', 'password', '포비');
 INSERT INTO member (email, password, name) VALUES ('roun@woowa.com', 'password', '로운');
 
+-- 매장 (매니저: 브라운=강남점, 토리=잠실점 / 포비·로운은 일반 사용자)
+INSERT INTO store (name, manager_member_id) VALUES ('방탈출 강남점', 1);
+INSERT INTO store (name, manager_member_id) VALUES ('방탈출 잠실점', 2);
+
+-- 테마를 매장에 배정 (1~8: 강남점, 9~15: 잠실점)
+UPDATE theme SET store_id = 1 WHERE id <= 8;
+UPDATE theme SET store_id = 2 WHERE id >= 9;
+
 INSERT INTO reservation_time (start_at) VALUES ('10:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('11:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('12:00:00');

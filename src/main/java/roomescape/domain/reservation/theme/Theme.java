@@ -7,13 +7,19 @@ public class Theme {
     private final ThemeName name;
     private final Description description;
     private final ThumbnailUrl url;
+    private final Long storeId;
 
     public Theme(Long id, ThemeName name, Description description, ThumbnailUrl url) {
+        this(id, name, description, url, null);
+    }
+
+    public Theme(Long id, ThemeName name, Description description, ThumbnailUrl url, Long storeId) {
         validate(name, description, url);
         this.id = id;
         this.name = name;
         this.description = description;
         this.url = url;
+        this.storeId = storeId;
     }
 
     private void validate(ThemeName name, Description description, ThumbnailUrl url) {
@@ -36,5 +42,9 @@ public class Theme {
 
     public ThumbnailUrl getUrl() {
         return url;
+    }
+
+    public Long getStoreId() {
+        return storeId;
     }
 }

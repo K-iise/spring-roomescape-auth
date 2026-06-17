@@ -3,6 +3,10 @@ INSERT INTO member (email, password, name) VALUES ('brown@woowa.com', 'password'
 INSERT INTO member (email, password, name) VALUES ('tory@woowa.com', 'password', '토리');
 INSERT INTO member (email, password, name) VALUES ('pobi@woowa.com', 'password', '포비');
 
+-- 매장 (매니저: 브라운=강남점, 토리=잠실점 / 포비는 일반 사용자)
+INSERT INTO store (name, manager_member_id) VALUES ('방탈출 강남점', 1);
+INSERT INTO store (name, manager_member_id) VALUES ('방탈출 잠실점', 2);
+
 -- 테마
 INSERT INTO theme (name, description, url) VALUES ('우테코 공포물', '레벨2 미션의 공포', '/images/horror');
 INSERT INTO theme (name, description, url) VALUES ('미래 도시', '2050년 서울의 이야기', '/images/future-city');
@@ -19,6 +23,10 @@ INSERT INTO theme (name, description, url) VALUES ('심해 탈출', '침몰하�
 INSERT INTO theme (name, description, url) VALUES ('폐병원의 진실', '1978년 이후 아무도 돌아오지 못한 그곳', '/images/abandoned-hospital');
 INSERT INTO theme (name, description, url) VALUES ('마지막 탐정', '연쇄 살인마의 다음 타깃은 바로 당신이다', '/images/last-detective');
 INSERT INTO theme (name, description, url) VALUES ('시간의 틈', '시공간이 뒤틀린 고대 유적 속에 갇혀버렸다', '/images/time-rift');
+
+-- 테마를 매장에 배정 (1~8: 강남점, 9~15: 잠실점)
+UPDATE theme SET store_id = 1 WHERE id <= 8;
+UPDATE theme SET store_id = 2 WHERE id >= 9;
 
 -- 예약 시간
 INSERT INTO reservation_time (start_at) VALUES ('10:00:00');
