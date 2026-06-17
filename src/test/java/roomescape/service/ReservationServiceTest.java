@@ -27,6 +27,7 @@ import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.config.FixedClockConfig;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.StoreDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.reservation.Reservation;
@@ -75,11 +76,13 @@ class ReservationServiceTest {
     private ThemeDao themeDao;
     @Mock
     private WaitingDao waitingDao;
+    @Mock
+    private StoreDao storeDao;
 
     @BeforeEach
     public void setUp() {
         reservationService = new ReservationService(
-                reservationDao, reservationTimeDao, themeDao, waitingDao, fixedClock
+                reservationDao, reservationTimeDao, themeDao, waitingDao, storeDao, fixedClock
         );
     }
 

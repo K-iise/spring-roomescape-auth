@@ -32,6 +32,28 @@ public final class ReservationMapper {
         );
     };
 
+    public static final RowMapper<Reservation> RESERVATION_WITH_STORE_ROW_MAPPER = (rs, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime()
+        );
+        Theme theme = new Theme(
+                rs.getLong("theme_id"),
+                ThemeName.parse(rs.getString("theme_name")),
+                Description.parse(rs.getString("description")),
+                ThumbnailUrl.parse(rs.getString("url")),
+                rs.getObject("store_id", Long.class)
+        );
+        return new Reservation(
+                rs.getLong("id"),
+                rs.getLong("member_id"),
+                UserName.parse(rs.getString("name")),
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme
+        );
+    };
+
     private ReservationMapper() {
     }
 }

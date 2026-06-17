@@ -91,6 +91,18 @@ public class ThemeDao {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }
 
+    public Optional<Long> findStoreIdByThemeId(Long themeId) {
+        List<Long> result = jdbcTemplate.query(
+                "SELECT store_id FROM theme WHERE id = ?",
+                (rs, rowNum) -> rs.getObject("store_id", Long.class),
+                themeId
+        );
+        if (result.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.ofNullable(result.getFirst());
+    }
+
     public boolean existsByName(String name) {
         Boolean result = jdbcTemplate.queryForObject("""
                         SELECT EXISTS(

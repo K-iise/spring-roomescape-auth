@@ -10,10 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.StoreDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
 import roomescape.dao.dto.WaitingQueryResult;
@@ -21,6 +23,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.store.Store;
+import roomescape.service.dto.command.ManagerReservationCommand;
 import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.result.ReservationDetailResult;
 import roomescape.service.dto.result.ReservationDetailResults;
@@ -33,6 +37,7 @@ public class ReservationService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
     private final WaitingDao waitingDao;
+    private final StoreDao storeDao;
     private final Clock clock;
 
     public ReservationService(
@@ -40,12 +45,14 @@ public class ReservationService {
             ReservationTimeDao reservationTimeDao,
             ThemeDao themeDao,
             WaitingDao waitingDao,
+            StoreDao storeDao,
             Clock clock
     ) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
         this.waitingDao = waitingDao;
+        this.storeDao = storeDao;
         this.clock = clock;
     }
 
@@ -73,7 +80,7 @@ public class ReservationService {
     @Transactional
     public ReservationResult reserve(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
-        validateNoWaiting(command);
+        validateNoWaiting(command.date(), command.timeId(), command.themeId());
         try {
             Reservation reserved = reservationDao.save(reservation);
             return ReservationResult.from(reserved);
@@ -88,7 +95,7 @@ public class ReservationService {
         origin.validateOwner(command.memberId());
         validatePastTime(origin.getDate(), origin.getTime());
         Reservation modified = convertToReservation(id, command);
-        validateNoWaiting(command);
+        validateNoWaiting(command.date(), command.timeId(), command.themeId());
         boolean updated;
         try {
             updated = reservationDao.update(modified);
@@ -127,8 +134,8 @@ public class ReservationService {
     }
 
     private Reservation convertToReservation(Long id, ReservationCommand command) {
-        ReservationTime time = getReservationTimeOrThrow(command);
-        Theme theme = getThemeOrThrow(command);
+        ReservationTime time = getReservationTimeOrThrow(command.timeId());
+        Theme theme = getThemeOrThrow(command.themeId());
         validateAvailability(command.date(), time, theme);
 
         return new Reservation(
@@ -173,8 +180,8 @@ public class ReservationService {
         }
     }
 
-    private void validateNoWaiting(ReservationCommand command) {
-        if (waitingDao.existsBySlot(command.date(), command.timeId(), command.themeId())) {
+    private void validateNoWaiting(LocalDate date, Long timeId, Long themeId) {
+        if (waitingDao.existsBySlot(date, timeId, themeId)) {
             throw new ConflictException("이미 예약 대기자가 있는 시간입니다, 예약 대기로 신청해주세요.");
         }
     }
@@ -184,13 +191,80 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
     }
 
-    private Theme getThemeOrThrow(ReservationCommand command) {
-        return themeDao.findThemeById(command.themeId())
+    private Theme getThemeOrThrow(Long themeId) {
+        return themeDao.findThemeById(themeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
-    private ReservationTime getReservationTimeOrThrow(ReservationCommand command) {
-        return reservationTimeDao.findTimeById(command.timeId())
+    private ReservationTime getReservationTimeOrThrow(Long timeId) {
+        return reservationTimeDao.findTimeById(timeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
+    }
+
+    public List<ReservationResult> findReservationsByManager(Long memberId) {
+        Store store = getManagedStoreOrThrow(memberId);
+
+        return reservationDao.findAllByStoreId(store.getId()).stream()
+                .map(ReservationResult::from)
+                .toList();
+    }
+
+    @Transactional
+    public ReservationResult changeReservationByManager(Long memberId, Long id, ManagerReservationCommand command) {
+        Store store = getManagedStoreOrThrow(memberId);
+        Reservation origin = getReservationWithStoreOrThrow(id);
+        origin.validateManagedBy(store);
+        validatePastTime(origin.getDate(), origin.getTime());
+
+        ReservationTime time = getReservationTimeOrThrow(command.timeId());
+        Theme theme = getThemeOrThrow(command.themeId());
+        validateTargetStore(store, command.themeId());
+        validateAvailability(command.date(), time, theme);
+        validateNoWaiting(command.date(), command.timeId(), command.themeId());
+
+        Reservation modified = new Reservation(id, origin.getMemberId(), origin.getName(), command.date(), time, theme);
+        boolean updated;
+        try {
+            updated = reservationDao.update(modified);
+        } catch (DuplicateKeyException e) {
+            throw new ConflictException("이미 예약된 시간입니다. 다시 시도해주세요.");
+        }
+        if (!updated) {
+            throw new NotFoundException("변경하고자 하는 예약이 존재하지 않습니다.");
+        }
+
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
+        return ReservationResult.from(modified);
+    }
+
+    @Transactional
+    public void removeReservationByManager(Long memberId, Long id) {
+        Store store = getManagedStoreOrThrow(memberId);
+        Reservation origin = getReservationWithStoreOrThrow(id);
+        origin.validateManagedBy(store);
+        if (!reservationDao.delete(id)) {
+            return;
+        }
+        if (isPast(origin.getDate(), origin.getTime())) {
+            return;
+        }
+        promoteFirstWaiting(origin.getDate(), origin.getTime(), origin.getTheme());
+    }
+
+    private Store getManagedStoreOrThrow(Long memberId) {
+        return storeDao.findByManagerMemberId(memberId)
+                .orElseThrow(() -> new ForbiddenException("매장 관리 권한이 없습니다."));
+    }
+
+    private Reservation getReservationWithStoreOrThrow(Long id) {
+        return reservationDao.findByIdWithStore(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
+    }
+
+    private void validateTargetStore(Store store, Long themeId) {
+        Long targetStoreId = themeDao.findStoreIdByThemeId(themeId).orElse(null);
+        if (!store.canManage(targetStoreId)) {
+            throw new ForbiddenException("다른 매장의 테마로는 변경할 수 없습니다.");
+        }
     }
 }

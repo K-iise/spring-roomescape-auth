@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import static roomescape.dao.rowMapper.ReservationMapper.RESERVATION_ROW_MAPPER;
+import static roomescape.dao.rowMapper.ReservationMapper.RESERVATION_WITH_STORE_ROW_MAPPER;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -56,6 +57,35 @@ public class ReservationDao {
                 RESERVATION_ROW_MAPPER,
                 memberId
         );
+    }
+
+    public List<Reservation> findAllByStoreId(Long storeId) {
+        String sql = """
+                SELECT r.id, r.member_id, m.name, r.date, rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM reservation r
+                INNER JOIN member m ON r.member_id = m.id
+                INNER JOIN reservation_time rt ON r.time_id = rt.id
+                INNER JOIN theme t ON r.theme_id = t.id
+                WHERE t.store_id = ?
+                ORDER BY r.date, rt.start_at ASC;
+                """;
+        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, storeId);
+    }
+
+    public Optional<Reservation> findByIdWithStore(Long id) {
+        String sql = """
+                SELECT r.id, r.member_id, m.name, r.date, rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url, t.store_id
+                FROM reservation r
+                INNER JOIN member m ON r.member_id = m.id
+                INNER JOIN reservation_time rt ON r.time_id = rt.id
+                INNER JOIN theme t ON r.theme_id = t.id
+                WHERE r.id = ?
+                """;
+        return jdbcTemplate.query(sql, RESERVATION_WITH_STORE_ROW_MAPPER, id)
+                .stream()
+                .findFirst();
     }
 
     public boolean existsBy(LocalDate date, Theme theme, ReservationTime time) {

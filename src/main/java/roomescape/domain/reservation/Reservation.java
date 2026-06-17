@@ -5,6 +5,7 @@ import java.util.Objects;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.domain.store.Store;
 
 public class Reservation {
 
@@ -40,6 +41,12 @@ public class Reservation {
     public void validateOwner(Long memberId) {
         if (!this.memberId.equals(memberId)) {
             throw new ForbiddenException("다른 사람의 예약은 취소/변경할 수 없습니다.");
+        }
+    }
+
+    public void validateManagedBy(Store store) {
+        if (!store.canManage(theme.getStoreId())) {
+            throw new ForbiddenException("다른 매장의 예약은 관리할 수 없습니다.");
         }
     }
 
