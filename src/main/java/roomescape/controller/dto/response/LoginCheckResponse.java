@@ -1,11 +1,11 @@
 package roomescape.controller.dto.response;
 
-import roomescape.service.dto.result.MemberResult;
+import roomescape.common.auth.LoginMember;
 
 public record LoginCheckResponse(
         String name
 ) {
-    public static LoginCheckResponse from(MemberResult result) {
-        return new LoginCheckResponse(result.name());
+    public static LoginCheckResponse from(LoginMember member) {
+        return new LoginCheckResponse(member.name());
     }
 }
