@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.containsString;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
 import io.restassured.RestAssured;
-import io.restassured.filter.session.SessionFilter;
 import io.restassured.http.ContentType;
 import io.restassured.path.json.JsonPath;
 import java.util.HashMap;
@@ -25,11 +24,11 @@ public class WaitingApiTest {
 
     @Test
     void 예약_대기_생성_API() {
-        SessionFilter session = loginAs("로운");
-        Long createdId = createWaiting(session, FUTURE_DATE, timeId, themeId);
+        String token = loginAs("로운");
+        Long createdId = createWaiting(token, FUTURE_DATE, timeId, themeId);
         assertThat(createdId).isNotNull();
 
-        JsonPath jsonPath = getMyReservations(session);
+        JsonPath jsonPath = getMyReservations(token);
         List<Map<String, Object>> details = jsonPath.getList("reservationDetailResponses");
 
         assertThat(details).hasSize(1);
@@ -41,7 +40,7 @@ public class WaitingApiTest {
 
     @Test
     void 예약이_없는_슬롯에_대기를_신청하면_예외가_발생한다() {
-        SessionFilter session = loginAs("로운");
+        String token = loginAs("로운");
         Long emptySlotTimeId = 6L;
 
         Map<String, Object> body = new HashMap<>();
@@ -50,7 +49,7 @@ public class WaitingApiTest {
         body.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when().post("/waitings")
@@ -58,12 +57,12 @@ public class WaitingApiTest {
                 .statusCode(422)
                 .body("message", containsString("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다."));
 
-        assertThat(getMyReservations(session).getList("reservationDetailResponses")).isEmpty();
+        assertThat(getMyReservations(token).getList("reservationDetailResponses")).isEmpty();
     }
 
     @Test
     void 같은_사용자가_같은_슬롯에_중복으로_대기를_신청하면_예외가_발생한다() {
-        SessionFilter session = loginAs("토리");
+        String token = loginAs("토리");
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", FUTURE_DATE);
@@ -71,7 +70,7 @@ public class WaitingApiTest {
         body.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when().post("/waitings")
@@ -79,12 +78,12 @@ public class WaitingApiTest {
                 .statusCode(422)
                 .body("message", containsString("예약 대기는 중복으로 생성할 수 없습니다."));
 
-        assertThat(waitingCount(session)).isEqualTo(1);
+        assertThat(waitingCount(token)).isEqualTo(1);
     }
 
     @Test
     void 본인이_예약한_슬롯에_대기를_신청하면_예외가_발생한다() {
-        SessionFilter session = loginAs("브라운");
+        String token = loginAs("브라운");
 
         Map<String, Object> body = new HashMap<>();
         body.put("date", FUTURE_DATE);
@@ -92,7 +91,7 @@ public class WaitingApiTest {
         body.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when().post("/waitings")
@@ -100,28 +99,28 @@ public class WaitingApiTest {
                 .statusCode(422)
                 .body("message", containsString("본인이 이미 예약한 시간에는 대기를 신청할 수 없습니다."));
 
-        assertThat(waitingCount(session)).isEqualTo(0);
+        assertThat(waitingCount(token)).isEqualTo(0);
     }
 
     @Test
     void 예약_대기_취소_API() {
-        SessionFilter session = loginAs("토리");
+        String token = loginAs("토리");
 
         RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .when().delete("/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);
 
-        assertThat(waitingCount(session)).isEqualTo(0);
+        assertThat(waitingCount(token)).isEqualTo(0);
     }
 
     @Test
     void 다른_사람의_대기를_삭제는_예외가_발생한다() {
-        SessionFilter session = loginAs("로운");
+        String token = loginAs("로운");
 
         RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .when().delete("/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(403)
@@ -130,20 +129,17 @@ public class WaitingApiTest {
         assertThat(waitingCount(loginAs("토리"))).isEqualTo(1);
     }
 
-    private SessionFilter loginAs(String name) {
-        SessionFilter session = new SessionFilter();
+    private String loginAs(String name) {
         Map<String, Object> body = new HashMap<>();
         body.put("email", emailOf(name));
         body.put("password", "password");
 
-        RestAssured.given()
-                .filter(session)
+        return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when().post("/login")
-                .then().statusCode(200);
-
-        return session;
+                .then().statusCode(200)
+                .extract().jsonPath().getString("accessToken");
     }
 
     private String emailOf(String name) {
@@ -156,14 +152,14 @@ public class WaitingApiTest {
         };
     }
 
-    private Long createWaiting(SessionFilter session, String date, Long timeId, Long themeId) {
+    private Long createWaiting(String token, String date, Long timeId, Long themeId) {
         Map<String, Object> body = new HashMap<>();
         body.put("date", date);
         body.put("timeId", timeId);
         body.put("themeId", themeId);
 
         return RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .contentType(ContentType.JSON)
                 .body(body)
                 .when().post("/waitings")
@@ -172,17 +168,17 @@ public class WaitingApiTest {
                 .extract().jsonPath().getLong("id");
     }
 
-    private JsonPath getMyReservations(SessionFilter session) {
+    private JsonPath getMyReservations(String token) {
         return RestAssured.given().log().all()
-                .filter(session)
+                .header("Authorization", "Bearer " + token)
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
                 .extract().jsonPath();
     }
 
-    private Long waitingCount(SessionFilter session) {
-        List<Map<String, Object>> responses = getMyReservations(session)
+    private Long waitingCount(String token) {
+        List<Map<String, Object>> responses = getMyReservations(token)
                 .getList("reservationDetailResponses");
 
         return responses.stream()
