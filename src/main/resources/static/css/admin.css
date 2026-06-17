@@ -55,6 +55,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
@@ -91,6 +92,27 @@ body {
   font-weight: 600;
 }
 
+.admin-session {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+.admin-session__user {
+  color: var(--text-sub);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.admin-session .admin-session__logout {
+  margin-top: 0;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.85rem;
+}
+
 .main {
   max-width: 1100px;
   margin: 0 auto;
@@ -98,6 +120,38 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.manager-context {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.manager-context__label {
+  flex: 0 0 auto;
+  padding: 0.25rem 0.55rem;
+  border-radius: 999px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.manager-context__name {
+  color: var(--text);
+  font-size: 1.05rem;
+}
+
+.manager-context__msg {
+  margin: 0 0 0 auto;
+  color: var(--text-sub);
+  font-size: 0.9rem;
 }
 
 .card {
@@ -313,6 +367,25 @@ body {
 }
 
 @media (max-width: 640px) {
+  .header-inner,
+  .admin-session,
+  .manager-context {
+    align-items: flex-start;
+  }
+
+  .admin-session,
+  .manager-context {
+    width: 100%;
+  }
+
+  .manager-context {
+    flex-direction: column;
+  }
+
+  .manager-context__msg {
+    margin-left: 0;
+  }
+
   .form-grid {
     grid-template-columns: 1fr;
   }

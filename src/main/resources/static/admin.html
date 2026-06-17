@@ -14,10 +14,20 @@
             <a href="/index.html" class="nav-link">예약</a>
             <a href="/admin.html" class="nav-link active">관리자</a>
         </nav>
+        <div class="admin-session" aria-live="polite">
+            <span id="admin-user-name" class="admin-session__user"></span>
+            <button type="button" id="admin-logout-btn" class="btn btn--ghost admin-session__logout">로그아웃</button>
+        </div>
     </div>
 </header>
 
 <main class="main">
+    <section class="manager-context" aria-label="관리 매장">
+        <span class="manager-context__label">관리 매장</span>
+        <strong id="managed-store-name" class="manager-context__name">확인 중</strong>
+        <p id="manager-context-msg" class="manager-context__msg" role="status"></p>
+    </section>
+
     <section class="card">
         <h2 class="section-title">테마 추가</h2>
         <p class="section-desc">새 테마를 등록합니다. 썸네일은 이미지 파일로 첨부합니다.</p>

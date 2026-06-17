@@ -23,6 +23,10 @@
   const reservationsBody = document.getElementById("reservations-body");
   const refreshReservations = document.getElementById("refresh-reservations");
   const reservationsMsg = document.getElementById("reservations-msg");
+  const adminUserName = document.getElementById("admin-user-name");
+  const adminLogoutBtn = document.getElementById("admin-logout-btn");
+  const managedStoreName = document.getElementById("managed-store-name");
+  const managerContextMsg = document.getElementById("manager-context-msg");
 
   // --- 유틸리티 함수 ---
   function setMsg(el, text, ok) {
@@ -61,6 +65,47 @@
     return null;
   }
 
+  function redirectToLogin() {
+    window.location.assign("/login.html");
+  }
+
+  function onUnauthorized() {
+    localStorage.removeItem("accessToken");
+    redirectToLogin();
+  }
+
+  async function loadAdminContext() {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      redirectToLogin();
+      return null;
+    }
+
+    try {
+      const member = await fetchJson("/login/check");
+      if (adminUserName) {
+        adminUserName.textContent = `${member.name}님`;
+      }
+      if (member.store) {
+        managedStoreName.textContent = member.store.name;
+        managerContextMsg.textContent = `${member.store.name} 예약을 관리 중입니다.`;
+        return member;
+      }
+
+      alert("매장 관리 권한이 없습니다.");
+      window.location.assign("/index.html");
+      return null;
+    } catch (e) {
+      onUnauthorized();
+      return null;
+    }
+  }
+
+  function logout() {
+    localStorage.removeItem("accessToken");
+    redirectToLogin();
+  }
+
   function formatTime(t) {
     if (!t) return "—";
     const parts = String(t).split(":");
@@ -71,7 +116,7 @@
   async function loadThemesIntoDeleteSelect() {
     themeDeleteSelect.innerHTML = "";
     try {
-      const apiThemes = await fetchJson(`/themes`);
+      const apiThemes = await fetchJson(`/admin/themes`);
       const themes = apiThemes || [];
       const sorted = [...themes].sort((a, b) => a.name.localeCompare(b.name, "ko"));
 
@@ -187,15 +232,15 @@
     setMsg(reservationsMsg, "", true);
     reservationsBody.innerHTML = "";
     try {
-      const list = await fetchJson("/reservations");
+      const list = await fetchJson("/admin/reservations");
       if (!list || !list.length) {
         reservationsBody.innerHTML = '<tr><td colspan="5">예약이 없습니다.</td></tr>';
         return;
       }
       list.forEach((r) => {
         const tr = document.createElement("tr");
-        const timeVal = r.time && r.time.startAt ? r.time.startAt : r.time;
-        const cells = [r.id, r.name, r.date, formatTime(timeVal), r.theme?.name || "—"];
+        const timeVal = r.timeResponse && r.timeResponse.startAt ? r.timeResponse.startAt : null;
+        const cells = [r.id, r.name, r.date, formatTime(timeVal), r.themeResponse?.name || "—"];
         cells.forEach(text => {
           const td = document.createElement("td");
           td.textContent = text;
@@ -204,13 +249,23 @@
         reservationsBody.appendChild(tr);
       });
     } catch (e) {
-      setMsg(reservationsMsg, "로드 실패", false);
+      setMsg(reservationsMsg, e.message || "로드 실패", false);
     }
   }
 
   refreshReservations.addEventListener("click", loadReservations);
+  adminLogoutBtn.addEventListener("click", logout);
 
-  loadThemesIntoDeleteSelect();
-  loadTimesIntoDeleteSelect();
-  loadReservations();
+  async function init() {
+    const member = await loadAdminContext();
+    if (!member || !member.store) {
+      return;
+    }
+
+    loadThemesIntoDeleteSelect();
+    loadTimesIntoDeleteSelect();
+    loadReservations();
+  }
+
+  init();
 })();
