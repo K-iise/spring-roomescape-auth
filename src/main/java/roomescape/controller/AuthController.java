@@ -13,6 +13,7 @@ import roomescape.controller.dto.request.LoginRequest;
 import roomescape.controller.dto.response.LoginCheckResponse;
 import roomescape.controller.dto.response.TokenResponse;
 import roomescape.service.AuthService;
+import roomescape.service.StoreService;
 import roomescape.service.dto.command.LoginCommand;
 import roomescape.service.dto.result.MemberResult;
 
@@ -20,10 +21,12 @@ import roomescape.service.dto.result.MemberResult;
 public class AuthController {
 
     private final AuthService authService;
+    private final StoreService storeService;
     private final JwtTokenProvider jwtTokenProvider;
 
-    public AuthController(AuthService authService, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(AuthService authService, StoreService storeService, JwtTokenProvider jwtTokenProvider) {
         this.authService = authService;
+        this.storeService = storeService;
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -38,6 +41,6 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public ResponseEntity<LoginCheckResponse> checkLogin(@Login LoginMember member) {
-        return ResponseEntity.ok(LoginCheckResponse.from(member));
+        return ResponseEntity.ok(LoginCheckResponse.of(member, storeService.findManagedStore(member.id())));
     }
 }
